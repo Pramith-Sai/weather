@@ -6,11 +6,44 @@ import NavBar from '@/components/NavBar';
 import CurrentWeather from '@/components/CurrentWeather';
 import Forecast from '@/components/Forecast';
 import { Loader2 } from 'lucide-react';
+import { useAuth } from '@/context/AuthContext';
+import { supabase } from '@/integrations/supabase/client';
 
 const Index = () => {
   const [weatherData, setWeatherData] = useState<WeatherData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const { session } = useAuth();
+  
+  // Fetch user's saved location if logged in
+  useEffect(() => {
+    const fetchUserLocation = async () => {
+      if (session.user && !session.isLoading) {
+        try {
+          const { data, error } = await supabase
+            .from('profiles')
+            .select('location_id')
+            .eq('id', session.user.id)
+            .single();
+            
+          if (error) throw error;
+          
+          if (data && data.location_id) {
+            fetchWeather(data.location_id);
+          } else {
+            fetchWeather(); // Use default location
+          }
+        } catch (err) {
+          console.error('Error fetching user location:', err);
+          fetchWeather(); // Use default location on error
+        }
+      } else {
+        fetchWeather(); // Use default location if not logged in
+      }
+    };
+    
+    fetchUserLocation();
+  }, [session.user, session.isLoading]);
   
   // Fetch weather data
   const fetchWeather = async (locationId?: string) => {
@@ -27,13 +60,22 @@ const Index = () => {
     }
   };
   
-  // Initial data fetching
-  useEffect(() => {
-    fetchWeather();
-  }, []);
-  
   // Handle location selection from search
-  const handleLocationSelect = (locationId: string) => {
+  const handleLocationSelect = async (locationId: string) => {
+    // Save the selected location for logged in users
+    if (session.user) {
+      try {
+        const { error } = await supabase
+          .from('profiles')
+          .update({ location_id: locationId })
+          .eq('id', session.user.id);
+          
+        if (error) throw error;
+      } catch (err) {
+        console.error('Error saving location:', err);
+      }
+    }
+    
     fetchWeather(locationId);
   };
   

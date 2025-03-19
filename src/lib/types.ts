@@ -1,4 +1,3 @@
-
 // Weather condition types
 export type WeatherCondition = 
   | 'clear' 
@@ -84,4 +83,21 @@ export interface LocationSearchResult {
   name: string;
   region: string;
   country: string;
+}
+
+export type AuthSession = {
+  user: {
+    id: string;
+    email?: string;
+  } | null;
+  isLoading: boolean;
+}
+
+export type UserProfile = {
+  id: string;
+  username?: string;
+  avatar_url?: string;
+  location_id?: string;
+  created_at: string;
+  updated_at: string;
 }
