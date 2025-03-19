@@ -1,15 +1,14 @@
-
 import { WeatherData, LocationSearchResult, WeatherCondition } from './types';
 
 // Mock data for demonstration purposes
 const mockWeatherData: WeatherData = {
   location: {
-    name: "New York",
-    region: "New York",
-    country: "United States",
-    latitude: 40.7128,
-    longitude: -74.0060,
-    timezone: "America/New_York",
+    name: "Mumbai",
+    region: "Maharashtra",
+    country: "India",
+    latitude: 19.0760,
+    longitude: 72.8777,
+    timezone: "Asia/Kolkata",
     localTime: new Date().toLocaleTimeString('en-US', { 
       hour: '2-digit', 
       minute: '2-digit',
@@ -17,17 +16,17 @@ const mockWeatherData: WeatherData = {
     }),
   },
   current: {
-    temperature: 72,
-    feelsLike: 74,
+    temperature: 32,
+    feelsLike: 34,
     condition: "partly-cloudy",
     conditionText: "Partly cloudy",
     windSpeed: 8,
-    windDirection: "NE",
-    humidity: 65,
-    uvIndex: 6,
+    windDirection: "SW",
+    humidity: 75,
+    uvIndex: 8,
     visibility: 10,
-    pressure: 1015,
-    precipitationProbability: 20,
+    pressure: 1008,
+    precipitationProbability: 10,
     lastUpdated: "Just now",
   },
   forecast: {
@@ -109,18 +108,18 @@ const mockWeatherData: WeatherData = {
   }
 };
 
-// Mock data for location search results
+// Mock data for location search results with Indian cities
 const mockLocationResults: LocationSearchResult[] = [
-  { id: "1", name: "New York", region: "New York", country: "United States" },
-  { id: "2", name: "Los Angeles", region: "California", country: "United States" },
-  { id: "3", name: "Chicago", region: "Illinois", country: "United States" },
-  { id: "4", name: "San Francisco", region: "California", country: "United States" },
-  { id: "5", name: "Miami", region: "Florida", country: "United States" },
-  { id: "6", name: "London", region: "London", country: "United Kingdom" },
-  { id: "7", name: "Paris", region: "Île-de-France", country: "France" },
-  { id: "8", name: "Tokyo", region: "Tokyo", country: "Japan" },
-  { id: "9", name: "Sydney", region: "New South Wales", country: "Australia" },
-  { id: "10", name: "Berlin", region: "Berlin", country: "Germany" },
+  { id: "1", name: "Mumbai", region: "Maharashtra", country: "India" },
+  { id: "2", name: "Delhi", region: "Delhi", country: "India" },
+  { id: "3", name: "Bangalore", region: "Karnataka", country: "India" },
+  { id: "4", name: "Chennai", region: "Tamil Nadu", country: "India" },
+  { id: "5", name: "Kolkata", region: "West Bengal", country: "India" },
+  { id: "6", name: "Hyderabad", region: "Telangana", country: "India" },
+  { id: "7", name: "Ahmedabad", region: "Gujarat", country: "India" },
+  { id: "8", name: "Pune", region: "Maharashtra", country: "India" },
+  { id: "9", name: "Jaipur", region: "Rajasthan", country: "India" },
+  { id: "10", name: "Lucknow", region: "Uttar Pradesh", country: "India" },
 ];
 
 // API service with mock implementations
