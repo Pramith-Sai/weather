@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { WeatherIcon } from "@/components/WeatherIcon";
 import { CurrentWeather } from "@/lib/types";
-import { Droplets, Wind, Eye, Sunrise, Sunset, Compass, Pressure, ThermometerSun, CloudRain } from 'lucide-react';
+import { Droplets, Wind, Eye, Sunrise, Sunset, Compass, Gauge, ThermometerSun, CloudRain } from 'lucide-react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer, AreaChart, Area } from 'recharts';
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
 
@@ -284,7 +284,7 @@ const TodayDetails = ({ data, hourlyData, sunrise, sunset }: TodayDetailsProps) 
         <Card className="glass-panel card-hover">
           <CardHeader className="pb-2">
             <CardTitle className="flex items-center text-sm font-medium">
-              <Pressure size={16} className="mr-2 text-primary" /> Pressure
+              <Gauge size={16} className="mr-2 text-primary" /> Pressure
             </CardTitle>
           </CardHeader>
           <CardContent>
