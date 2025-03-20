@@ -66,8 +66,8 @@ const NavBar = ({
           {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center space-x-8">
             <Link 
-              to="/" 
-              className={`text-sm font-medium transition-colors ${isActive('/') ? 'text-primary' : 'text-gray-700 dark:text-gray-200 hover:text-primary dark:hover:text-primary'}`}
+              to="/today" 
+              className={`text-sm font-medium transition-colors ${isActive('/today') ? 'text-primary' : 'text-gray-700 dark:text-gray-200 hover:text-primary dark:hover:text-primary'}`}
             >
               Today
             </Link>
@@ -123,8 +123,8 @@ const NavBar = ({
             
             <div className="grid grid-cols-2 gap-2 pt-2">
               <Link 
-                to="/" 
-                className={`block px-3 py-2 rounded-md text-base font-medium transition-colors ${isActive('/') ? 'bg-gray-100 dark:bg-gray-800 text-primary' : 'text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-primary dark:hover:text-primary'}`}
+                to="/today" 
+                className={`block px-3 py-2 rounded-md text-base font-medium transition-colors ${isActive('/today') ? 'bg-gray-100 dark:bg-gray-800 text-primary' : 'text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-primary dark:hover:text-primary'}`}
                 onClick={() => setIsMobileMenuOpen(false)}
               >
                 Today
