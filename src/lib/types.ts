@@ -11,6 +11,19 @@ export type WeatherCondition =
   | 'fog' 
   | 'windy';
 
+// Air quality data structure
+export interface AirQuality {
+  index: number;
+  level: string;
+  color: string;
+  co: number | null;
+  no2: number | null;
+  o3: number | null;
+  pm2_5: number | null;
+  pm10: number | null;
+  so2: number | null;
+}
+
 // Current weather data structure
 export interface CurrentWeather {
   temperature: number;
@@ -25,6 +38,7 @@ export interface CurrentWeather {
   pressure: number;
   precipitationProbability: number;
   lastUpdated: string;
+  airQuality?: AirQuality;
 }
 
 // Daily forecast data structure

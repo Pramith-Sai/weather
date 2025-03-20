@@ -4,9 +4,13 @@ import { weatherApi } from '@/lib/weatherApi';
 import { WeatherData } from '@/lib/types';
 import NavBar from '@/components/NavBar';
 import CurrentWeather from '@/components/CurrentWeather';
+import TodayDetails from '@/components/TodayDetails';
+import AirQualityIndicator from '@/components/AirQualityIndicator';
+import LocationInfo from '@/components/LocationInfo';
 import { Loader2 } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
+import { Card, CardContent } from '@/components/ui/card';
 
 const Today = () => {
   const [weatherData, setWeatherData] = useState<WeatherData | null>(null);
@@ -95,14 +99,104 @@ const Today = () => {
           </div>
         ) : weatherData ? (
           <div className="space-y-12">
-            {/* Current Weather Section */}
+            {/* Location info */}
+            <LocationInfo location={weatherData.location} />
+            
+            {/* Current Weather and Air Quality Section */}
             <section>
-              <CurrentWeather 
+              <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+                <div className="lg:col-span-3">
+                  <CurrentWeather 
+                    data={weatherData.current} 
+                    locationName={weatherData.location.name}
+                    localTime={weatherData.location.localTime}
+                  />
+                </div>
+                
+                {/* Air Quality Card */}
+                {weatherData.current.airQuality && (
+                  <div className="lg:col-span-1">
+                    <Card className="h-full glass-panel card-hover flex items-center justify-center p-6">
+                      <CardContent className="p-0 flex flex-col items-center justify-center h-full">
+                        <AirQualityIndicator airQuality={weatherData.current.airQuality} size="lg" />
+                      </CardContent>
+                    </Card>
+                  </div>
+                )}
+              </div>
+            </section>
+            
+            {/* Today's Details Section */}
+            <section>
+              <h2 className="text-2xl font-light mb-6">Today's Weather Details</h2>
+              <TodayDetails 
                 data={weatherData.current} 
-                locationName={weatherData.location.name}
-                localTime={weatherData.location.localTime}
+                hourlyData={weatherData.forecast.hourly}
+                sunrise={weatherData.forecast.daily[0].day.sunrise}
+                sunset={weatherData.forecast.daily[0].day.sunset}
               />
             </section>
+            
+            {/* Air Quality Details (if available) */}
+            {weatherData.current.airQuality && (
+              <section>
+                <h2 className="text-2xl font-light mb-6">Air Quality Details</h2>
+                <Card className="glass-panel">
+                  <CardContent className="pt-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                      <div className="flex flex-col items-center">
+                        <AirQualityIndicator airQuality={weatherData.current.airQuality} />
+                      </div>
+                      
+                      <div className="space-y-4">
+                        <div>
+                          <p className="text-sm font-medium mb-1">PM2.5</p>
+                          <p className="text-xl font-light">{weatherData.current.airQuality.pm2_5} μg/m³</p>
+                          <p className="text-xs text-muted-foreground mt-1">Fine particulate matter</p>
+                        </div>
+                        
+                        <div>
+                          <p className="text-sm font-medium mb-1">PM10</p>
+                          <p className="text-xl font-light">{weatherData.current.airQuality.pm10} μg/m³</p>
+                          <p className="text-xs text-muted-foreground mt-1">Coarse particulate matter</p>
+                        </div>
+                      </div>
+                      
+                      <div className="space-y-4">
+                        <div>
+                          <p className="text-sm font-medium mb-1">O₃</p>
+                          <p className="text-xl font-light">{weatherData.current.airQuality.o3} μg/m³</p>
+                          <p className="text-xs text-muted-foreground mt-1">Ozone</p>
+                        </div>
+                        
+                        <div>
+                          <p className="text-sm font-medium mb-1">NO₂</p>
+                          <p className="text-xl font-light">{weatherData.current.airQuality.no2} μg/m³</p>
+                          <p className="text-xs text-muted-foreground mt-1">Nitrogen dioxide</p>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div className="mt-6 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+                      <p className="text-sm">
+                        {weatherData.current.airQuality.index <= 50 
+                          ? "Air quality is good. It's a great day to be active outside!"
+                          : weatherData.current.airQuality.index <= 100 
+                            ? "Air quality is acceptable, but sensitive groups may experience health effects."
+                            : weatherData.current.airQuality.index <= 150 
+                              ? "Members of sensitive groups may experience health effects. Consider limiting prolonged outdoor exertion."
+                              : weatherData.current.airQuality.index <= 200 
+                                ? "Everyone may begin to experience health effects. Sensitive groups should limit outdoor activity."
+                                : weatherData.current.airQuality.index <= 300 
+                                  ? "Health alert: Everyone may experience more serious health effects. Avoid outdoor activity."
+                                  : "Health warning: Emergency conditions. Everyone should avoid outdoor activity."
+                        }
+                      </p>
+                    </div>
+                  </CardContent>
+                </Card>
+              </section>
+            )}
           </div>
         ) : null}
       </main>

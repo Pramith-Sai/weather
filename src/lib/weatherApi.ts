@@ -1,4 +1,3 @@
-
 import { WeatherData, LocationSearchResult, WeatherCondition } from './types';
 
 // API key for WeatherAPI.com
@@ -24,6 +23,16 @@ const mapWeatherCondition = (code: number): WeatherCondition => {
   return 'partly-cloudy'; // Default fallback
 };
 
+// Map AQI index to descriptive text and color
+const getAirQualityInfo = (aqi: number) => {
+  if (aqi <= 50) return { level: 'Good', color: '#4ade80' }; // Green
+  if (aqi <= 100) return { level: 'Moderate', color: '#facc15' }; // Yellow
+  if (aqi <= 150) return { level: 'Unhealthy for Sensitive Groups', color: '#fb923c' }; // Orange
+  if (aqi <= 200) return { level: 'Unhealthy', color: '#f87171' }; // Red
+  if (aqi <= 300) return { level: 'Very Unhealthy', color: '#c084fc' }; // Purple
+  return { level: 'Hazardous', color: '#7f1d1d' }; // Dark Red/Maroon
+};
+
 // API service with real implementations
 export const weatherApi = {
   // Get current weather and forecast for a location
@@ -31,7 +40,7 @@ export const weatherApi = {
     try {
       const query = locationId || 'Delhi'; // Default to Delhi if no location provided
       const response = await fetch(
-        `${BASE_URL}/forecast.json?key=${API_KEY}&q=${query}&days=7&aqi=no&alerts=no`
+        `${BASE_URL}/forecast.json?key=${API_KEY}&q=${query}&days=7&aqi=yes&alerts=no`
       );
       
       if (!response.ok) {
@@ -39,6 +48,11 @@ export const weatherApi = {
       }
       
       const data = await response.json();
+      
+      // Extract air quality data
+      const airQuality = data.current.air_quality || {};
+      const aqiUS = Math.round(airQuality['us-epa-index'] || 1);
+      const aqiInfo = getAirQualityInfo(aqiUS);
       
       // Transform API response to match our app's data structure
       return {
@@ -65,9 +79,20 @@ export const weatherApi = {
           humidity: data.current.humidity,
           uvIndex: data.current.uv,
           visibility: Math.round(data.current.vis_miles),
-          pressure: data.current.pressure_mb,
+          pressure: Math.round(data.current.pressure_mb),
           precipitationProbability: data.forecast.forecastday[0].day.daily_chance_of_rain,
           lastUpdated: "Just now",
+          airQuality: {
+            index: aqiUS,
+            level: aqiInfo.level,
+            color: aqiInfo.color,
+            co: airQuality.co ? parseFloat(airQuality.co.toFixed(2)) : null,
+            no2: airQuality.no2 ? parseFloat(airQuality.no2.toFixed(2)) : null,
+            o3: airQuality.o3 ? parseFloat(airQuality.o3.toFixed(2)) : null,
+            pm2_5: airQuality.pm2_5 ? parseFloat(airQuality.pm2_5.toFixed(2)) : null,
+            pm10: airQuality.pm10 ? parseFloat(airQuality.pm10.toFixed(2)) : null,
+            so2: airQuality.so2 ? parseFloat(airQuality.so2.toFixed(2)) : null,
+          }
         },
         forecast: {
           daily: data.forecast.forecastday.map((day: any) => {
