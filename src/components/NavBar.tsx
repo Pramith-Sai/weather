@@ -1,22 +1,24 @@
-
 import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Menu, X, Moon, Sun, User, LogOut } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import SearchBar from './SearchBar';
 import { useAuth } from '@/context/AuthContext';
-
 interface NavBarProps {
   onLocationSelect: (locationId: string) => void;
 }
-
-const NavBar = ({ onLocationSelect }: NavBarProps) => {
+const NavBar = ({
+  onLocationSelect
+}: NavBarProps) => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [theme, setTheme] = useState<'light' | 'dark'>('light');
-  const { session, signOut } = useAuth();
+  const {
+    session,
+    signOut
+  } = useAuth();
   const navigate = useNavigate();
-  
+
   // Handle scroll event to change navbar appearance
   useEffect(() => {
     const handleScroll = () => {
@@ -26,7 +28,6 @@ const NavBar = ({ onLocationSelect }: NavBarProps) => {
         setIsScrolled(false);
       }
     };
-    
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
@@ -37,18 +38,11 @@ const NavBar = ({ onLocationSelect }: NavBarProps) => {
     setTheme(newTheme);
     document.documentElement.classList.toggle('dark');
   };
-  
   const handleSignOut = async () => {
     await signOut();
     navigate('/');
   };
-  
-  return (
-    <header 
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-        isScrolled ? 'bg-white/80 dark:bg-gray-900/80 backdrop-blur-lg shadow-sm' : 'bg-transparent'
-      }`}
-    >
+  return <header className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${isScrolled ? 'bg-white/80 dark:bg-gray-900/80 backdrop-blur-lg shadow-sm' : 'bg-transparent'}`}>
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
@@ -66,9 +60,7 @@ const NavBar = ({ onLocationSelect }: NavBarProps) => {
             <a href="#" className="text-sm font-medium text-gray-700 dark:text-gray-200 hover:text-primary dark:hover:text-primary transition-colors">
               Hourly
             </a>
-            <a href="#" className="text-sm font-medium text-gray-700 dark:text-gray-200 hover:text-primary dark:hover:text-primary transition-colors">
-              10 Day
-            </a>
+            <a href="#" className="text-sm font-medium text-gray-700 dark:text-gray-200 hover:text-primary dark:hover:text-primary transition-colors">7 Day</a>
             <a href="#" className="text-sm font-medium text-gray-700 dark:text-gray-200 hover:text-primary dark:hover:text-primary transition-colors">
               Radar
             </a>
@@ -79,44 +71,20 @@ const NavBar = ({ onLocationSelect }: NavBarProps) => {
             <div className="w-64">
               <SearchBar onLocationSelect={onLocationSelect} />
             </div>
-            <Button 
-              variant="ghost" 
-              size="icon" 
-              className="rounded-full" 
-              onClick={toggleTheme}
-            >
+            <Button variant="ghost" size="icon" className="rounded-full" onClick={toggleTheme}>
               {theme === 'light' ? <Moon size={18} /> : <Sun size={18} />}
             </Button>
             
-            {session.user ? (
-              <Button 
-                variant="outline" 
-                size="sm" 
-                onClick={handleSignOut}
-                className="ml-2"
-              >
+            {session.user ? <Button variant="outline" size="sm" onClick={handleSignOut} className="ml-2">
                 <LogOut size={16} className="mr-2" /> Sign Out
-              </Button>
-            ) : (
-              <Button 
-                variant="outline" 
-                size="sm"
-                onClick={() => navigate('/auth')}
-                className="ml-2"
-              >
+              </Button> : <Button variant="outline" size="sm" onClick={() => navigate('/auth')} className="ml-2">
                 <User size={16} className="mr-2" /> Sign In
-              </Button>
-            )}
+              </Button>}
           </div>
           
           {/* Mobile Menu Button */}
           <div className="md:hidden flex items-center">
-            <Button 
-              variant="ghost" 
-              size="icon" 
-              className="rounded-full" 
-              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-            >
+            <Button variant="ghost" size="icon" className="rounded-full" onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}>
               {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
             </Button>
           </div>
@@ -124,8 +92,7 @@ const NavBar = ({ onLocationSelect }: NavBarProps) => {
       </div>
       
       {/* Mobile Menu */}
-      {isMobileMenuOpen && (
-        <div className="md:hidden glass-panel animate-fade-in">
+      {isMobileMenuOpen && <div className="md:hidden glass-panel animate-fade-in">
           <div className="px-4 pt-2 pb-4 space-y-4">
             <SearchBar onLocationSelect={onLocationSelect} />
             
@@ -143,42 +110,19 @@ const NavBar = ({ onLocationSelect }: NavBarProps) => {
                 Radar
               </a>
               <div className="col-span-2 flex justify-between pt-2">
-                <Button 
-                  variant="outline" 
-                  className="w-1/2 justify-center mr-2" 
-                  onClick={toggleTheme}
-                >
-                  {theme === 'light' ? (
-                    <><Moon size={16} className="mr-2" /> Dark Mode</>
-                  ) : (
-                    <><Sun size={16} className="mr-2" /> Light Mode</>
-                  )}
+                <Button variant="outline" className="w-1/2 justify-center mr-2" onClick={toggleTheme}>
+                  {theme === 'light' ? <><Moon size={16} className="mr-2" /> Dark Mode</> : <><Sun size={16} className="mr-2" /> Light Mode</>}
                 </Button>
                 
-                {session.user ? (
-                  <Button 
-                    variant="outline" 
-                    className="w-1/2 justify-center"
-                    onClick={handleSignOut}
-                  >
+                {session.user ? <Button variant="outline" className="w-1/2 justify-center" onClick={handleSignOut}>
                     <LogOut size={16} className="mr-2" /> Sign Out
-                  </Button>
-                ) : (
-                  <Button 
-                    variant="outline" 
-                    className="w-1/2 justify-center"
-                    onClick={() => navigate('/auth')}
-                  >
+                  </Button> : <Button variant="outline" className="w-1/2 justify-center" onClick={() => navigate('/auth')}>
                     <User size={16} className="mr-2" /> Sign In
-                  </Button>
-                )}
+                  </Button>}
               </div>
             </div>
           </div>
-        </div>
-      )}
-    </header>
-  );
+        </div>}
+    </header>;
 };
-
 export default NavBar;
