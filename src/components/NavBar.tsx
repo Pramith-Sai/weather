@@ -1,12 +1,15 @@
+
 import { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { Menu, X, Moon, Sun, User, LogOut } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import SearchBar from './SearchBar';
 import { useAuth } from '@/context/AuthContext';
+
 interface NavBarProps {
   onLocationSelect: (locationId: string) => void;
 }
+
 const NavBar = ({
   onLocationSelect
 }: NavBarProps) => {
@@ -18,6 +21,7 @@ const NavBar = ({
     signOut
   } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
 
   // Handle scroll event to change navbar appearance
   useEffect(() => {
@@ -38,10 +42,17 @@ const NavBar = ({
     setTheme(newTheme);
     document.documentElement.classList.toggle('dark');
   };
+  
   const handleSignOut = async () => {
     await signOut();
     navigate('/');
   };
+  
+  // Check if a path is active
+  const isActive = (path: string) => {
+    return location.pathname === path;
+  };
+  
   return <header className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${isScrolled ? 'bg-white/80 dark:bg-gray-900/80 backdrop-blur-lg shadow-sm' : 'bg-transparent'}`}>
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
@@ -54,16 +65,30 @@ const NavBar = ({
           
           {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center space-x-8">
-            <Link to="/" className="text-sm font-medium text-gray-700 dark:text-gray-200 hover:text-primary dark:hover:text-primary transition-colors">
+            <Link 
+              to="/" 
+              className={`text-sm font-medium transition-colors ${isActive('/') ? 'text-primary' : 'text-gray-700 dark:text-gray-200 hover:text-primary dark:hover:text-primary'}`}
+            >
               Today
             </Link>
-            <a href="#" className="text-sm font-medium text-gray-700 dark:text-gray-200 hover:text-primary dark:hover:text-primary transition-colors">
+            <Link 
+              to="/hourly" 
+              className={`text-sm font-medium transition-colors ${isActive('/hourly') ? 'text-primary' : 'text-gray-700 dark:text-gray-200 hover:text-primary dark:hover:text-primary'}`}
+            >
               Hourly
-            </a>
-            <a href="#" className="text-sm font-medium text-gray-700 dark:text-gray-200 hover:text-primary dark:hover:text-primary transition-colors">7 Day</a>
-            <a href="#" className="text-sm font-medium text-gray-700 dark:text-gray-200 hover:text-primary dark:hover:text-primary transition-colors">
+            </Link>
+            <Link 
+              to="/seven-day" 
+              className={`text-sm font-medium transition-colors ${isActive('/seven-day') ? 'text-primary' : 'text-gray-700 dark:text-gray-200 hover:text-primary dark:hover:text-primary'}`}
+            >
+              7 Day
+            </Link>
+            <Link 
+              to="/radar" 
+              className={`text-sm font-medium transition-colors ${isActive('/radar') ? 'text-primary' : 'text-gray-700 dark:text-gray-200 hover:text-primary dark:hover:text-primary'}`}
+            >
               Radar
-            </a>
+            </Link>
           </nav>
           
           {/* Search and Auth Controls */}
@@ -97,18 +122,34 @@ const NavBar = ({
             <SearchBar onLocationSelect={onLocationSelect} />
             
             <div className="grid grid-cols-2 gap-2 pt-2">
-              <Link to="/" className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-primary dark:hover:text-primary transition-colors">
+              <Link 
+                to="/" 
+                className={`block px-3 py-2 rounded-md text-base font-medium transition-colors ${isActive('/') ? 'bg-gray-100 dark:bg-gray-800 text-primary' : 'text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-primary dark:hover:text-primary'}`}
+                onClick={() => setIsMobileMenuOpen(false)}
+              >
                 Today
               </Link>
-              <a href="#" className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-primary dark:hover:text-primary transition-colors">
+              <Link 
+                to="/hourly" 
+                className={`block px-3 py-2 rounded-md text-base font-medium transition-colors ${isActive('/hourly') ? 'bg-gray-100 dark:bg-gray-800 text-primary' : 'text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-primary dark:hover:text-primary'}`}
+                onClick={() => setIsMobileMenuOpen(false)}
+              >
                 Hourly
-              </a>
-              <a href="#" className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-primary dark:hover:text-primary transition-colors">
-                10 Day
-              </a>
-              <a href="#" className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-primary dark:hover:text-primary transition-colors">
+              </Link>
+              <Link 
+                to="/seven-day" 
+                className={`block px-3 py-2 rounded-md text-base font-medium transition-colors ${isActive('/seven-day') ? 'bg-gray-100 dark:bg-gray-800 text-primary' : 'text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-primary dark:hover:text-primary'}`}
+                onClick={() => setIsMobileMenuOpen(false)}
+              >
+                7 Day
+              </Link>
+              <Link 
+                to="/radar" 
+                className={`block px-3 py-2 rounded-md text-base font-medium transition-colors ${isActive('/radar') ? 'bg-gray-100 dark:bg-gray-800 text-primary' : 'text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-primary dark:hover:text-primary'}`}
+                onClick={() => setIsMobileMenuOpen(false)}
+              >
                 Radar
-              </a>
+              </Link>
               <div className="col-span-2 flex justify-between pt-2">
                 <Button variant="outline" className="w-1/2 justify-center mr-2" onClick={toggleTheme}>
                   {theme === 'light' ? <><Moon size={16} className="mr-2" /> Dark Mode</> : <><Sun size={16} className="mr-2" /> Light Mode</>}
@@ -125,4 +166,5 @@ const NavBar = ({
         </div>}
     </header>;
 };
+
 export default NavBar;
