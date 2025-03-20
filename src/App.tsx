@@ -23,7 +23,7 @@ const App = () => (
         <Sonner />
         <BrowserRouter>
           <Routes>
-            <Route path="/" element={<Navigate to="/today" replace />} />
+            <Route path="/" element={<Index />} />
             <Route path="/today" element={<Today />} />
             <Route path="/hourly" element={<Hourly />} />
             <Route path="/seven-day" element={<SevenDay />} />
