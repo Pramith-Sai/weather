@@ -1,150 +1,139 @@
+
 import { WeatherData, LocationSearchResult, WeatherCondition } from './types';
 
-// Mock data for demonstration purposes
-const mockWeatherData: WeatherData = {
-  location: {
-    name: "Mumbai",
-    region: "Maharashtra",
-    country: "India",
-    latitude: 19.0760,
-    longitude: 72.8777,
-    timezone: "Asia/Kolkata",
-    localTime: new Date().toLocaleTimeString('en-US', { 
-      hour: '2-digit', 
-      minute: '2-digit',
-      hour12: true
-    }),
-  },
-  current: {
-    temperature: 32,
-    feelsLike: 34,
-    condition: "partly-cloudy",
-    conditionText: "Partly cloudy",
-    windSpeed: 8,
-    windDirection: "SW",
-    humidity: 75,
-    uvIndex: 8,
-    visibility: 10,
-    pressure: 1008,
-    precipitationProbability: 10,
-    lastUpdated: "Just now",
-  },
-  forecast: {
-    daily: Array(7).fill(null).map((_, i) => {
-      const date = new Date();
-      date.setDate(date.getDate() + i);
-      
-      // Randomly generate conditions for demo
-      const conditions: WeatherCondition[] = [
-        "clear", "partly-cloudy", "cloudy", "rain", "showers", 
-        "thunderstorm", "clear", "partly-cloudy"
-      ];
-      const randomCondition = conditions[Math.floor(Math.random() * conditions.length)];
-      const nightCondition = conditions[Math.floor(Math.random() * conditions.length)];
-      
-      const conditionTextMap: Record<WeatherCondition, string> = {
-        "clear": "Clear sky",
-        "partly-cloudy": "Partly cloudy",
-        "cloudy": "Cloudy",
-        "rain": "Rain",
-        "showers": "Showers",
-        "thunderstorm": "Thunderstorm",
-        "snow": "Snow",
-        "sleet": "Sleet",
-        "fog": "Fog",
-        "windy": "Windy"
-      };
-      
-      return {
-        date: date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' }),
-        day: {
-          condition: randomCondition,
-          conditionText: conditionTextMap[randomCondition],
-          maxTemp: Math.floor(65 + Math.random() * 15),
-          minTemp: Math.floor(50 + Math.random() * 10),
-          precipitationProbability: Math.floor(Math.random() * 100),
-          sunrise: "6:24 AM",
-          sunset: "7:32 PM",
-        },
-        night: {
-          condition: nightCondition,
-          conditionText: conditionTextMap[nightCondition],
-          precipitationProbability: Math.floor(Math.random() * 100),
-        }
-      };
-    }),
-    hourly: Array(24).fill(null).map((_, i) => {
-      const date = new Date();
-      date.setHours(date.getHours() + i);
-      
-      const conditions: WeatherCondition[] = [
-        "clear", "partly-cloudy", "cloudy", "rain", "showers", 
-        "thunderstorm", "clear", "partly-cloudy"
-      ];
-      const randomCondition = conditions[Math.floor(Math.random() * conditions.length)];
-      
-      const conditionTextMap: Record<WeatherCondition, string> = {
-        "clear": "Clear sky",
-        "partly-cloudy": "Partly cloudy",
-        "cloudy": "Cloudy",
-        "rain": "Rain",
-        "showers": "Showers",
-        "thunderstorm": "Thunderstorm",
-        "snow": "Snow",
-        "sleet": "Sleet",
-        "fog": "Fog",
-        "windy": "Windy"
-      };
-      
-      return {
-        time: date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true }),
-        temperature: Math.floor(60 + Math.random() * 20),
-        condition: randomCondition,
-        conditionText: conditionTextMap[randomCondition],
-        precipitationProbability: Math.floor(Math.random() * 100),
-        windSpeed: Math.floor(5 + Math.random() * 15),
-      };
-    })
-  }
+// API key for WeatherAPI.com
+const API_KEY = '995b07fb34e84840914160220251903';
+const BASE_URL = 'https://api.weatherapi.com/v1';
+
+// Helper function to map API weather conditions to our app's condition types
+const mapWeatherCondition = (code: number): WeatherCondition => {
+  // Weather condition codes based on WeatherAPI documentation
+  if (code === 1000) return 'clear'; // Sunny/Clear
+  if (code >= 1003 && code <= 1009) return 'partly-cloudy'; // Partly cloudy
+  if (code >= 1030 && code <= 1039) return 'fog'; // Fog, mist, etc
+  if (code >= 1063 && code <= 1069) return 'showers'; // Patchy rain
+  if (code >= 1072 && code <= 1087) return 'rain'; // Rain, freezing rain
+  if (code >= 1114 && code <= 1117) return 'snow'; // Snow
+  if (code >= 1135 && code <= 1147) return 'fog'; // Fog, freezing fog
+  if (code >= 1150 && code <= 1201) return 'rain'; // Light/medium/heavy rain
+  if (code >= 1204 && code <= 1237) return 'sleet'; // Sleet
+  if (code >= 1240 && code <= 1246) return 'showers'; // Showers
+  if (code >= 1249 && code <= 1264) return 'sleet'; // Sleet showers
+  if (code >= 1273 && code <= 1282) return 'thunderstorm'; // Thunderstorms
+  
+  return 'partly-cloudy'; // Default fallback
 };
 
-// Mock data for location search results with Indian cities
-const mockLocationResults: LocationSearchResult[] = [
-  { id: "1", name: "Mumbai", region: "Maharashtra", country: "India" },
-  { id: "2", name: "Delhi", region: "Delhi", country: "India" },
-  { id: "3", name: "Bangalore", region: "Karnataka", country: "India" },
-  { id: "4", name: "Chennai", region: "Tamil Nadu", country: "India" },
-  { id: "5", name: "Kolkata", region: "West Bengal", country: "India" },
-  { id: "6", name: "Hyderabad", region: "Telangana", country: "India" },
-  { id: "7", name: "Ahmedabad", region: "Gujarat", country: "India" },
-  { id: "8", name: "Pune", region: "Maharashtra", country: "India" },
-  { id: "9", name: "Jaipur", region: "Rajasthan", country: "India" },
-  { id: "10", name: "Lucknow", region: "Uttar Pradesh", country: "India" },
-];
-
-// API service with mock implementations
+// API service with real implementations
 export const weatherApi = {
   // Get current weather and forecast for a location
   getWeather: async (locationId?: string): Promise<WeatherData> => {
-    // Simulate API call delay
-    await new Promise(resolve => setTimeout(resolve, 600));
-    return mockWeatherData;
+    try {
+      const query = locationId || 'Delhi'; // Default to Delhi if no location provided
+      const response = await fetch(
+        `${BASE_URL}/forecast.json?key=${API_KEY}&q=${query}&days=7&aqi=no&alerts=no`
+      );
+      
+      if (!response.ok) {
+        throw new Error(`API error: ${response.status}`);
+      }
+      
+      const data = await response.json();
+      
+      // Transform API response to match our app's data structure
+      return {
+        location: {
+          name: data.location.name,
+          region: data.location.region,
+          country: data.location.country,
+          latitude: data.location.lat,
+          longitude: data.location.lon,
+          timezone: data.location.tz_id,
+          localTime: new Date(data.location.localtime).toLocaleTimeString('en-US', { 
+            hour: '2-digit', 
+            minute: '2-digit',
+            hour12: true
+          }),
+        },
+        current: {
+          temperature: Math.round(data.current.temp_c),
+          feelsLike: Math.round(data.current.feelslike_c),
+          condition: mapWeatherCondition(data.current.condition.code),
+          conditionText: data.current.condition.text,
+          windSpeed: Math.round(data.current.wind_kph * 0.621371), // Convert km/h to mph
+          windDirection: data.current.wind_dir,
+          humidity: data.current.humidity,
+          uvIndex: data.current.uv,
+          visibility: Math.round(data.current.vis_miles),
+          pressure: data.current.pressure_mb,
+          precipitationProbability: data.forecast.forecastday[0].day.daily_chance_of_rain,
+          lastUpdated: "Just now",
+        },
+        forecast: {
+          daily: data.forecast.forecastday.map((day: any) => {
+            const date = new Date(day.date);
+            return {
+              date: date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' }),
+              day: {
+                condition: mapWeatherCondition(day.day.condition.code),
+                conditionText: day.day.condition.text,
+                maxTemp: Math.round(day.day.maxtemp_c),
+                minTemp: Math.round(day.day.mintemp_c),
+                precipitationProbability: day.day.daily_chance_of_rain,
+                sunrise: day.astro.sunrise,
+                sunset: day.astro.sunset,
+              },
+              night: {
+                condition: mapWeatherCondition(day.day.condition.code),
+                conditionText: day.day.condition.text,
+                precipitationProbability: day.day.daily_chance_of_rain,
+              }
+            };
+          }),
+          hourly: data.forecast.forecastday[0].hour.map((hour: any) => {
+            const time = new Date(hour.time);
+            return {
+              time: time.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true }),
+              temperature: Math.round(hour.temp_c),
+              condition: mapWeatherCondition(hour.condition.code),
+              conditionText: hour.condition.text,
+              precipitationProbability: hour.chance_of_rain,
+              windSpeed: Math.round(hour.wind_kph * 0.621371), // Convert km/h to mph
+            };
+          })
+        }
+      };
+    } catch (error) {
+      console.error('Error fetching weather data:', error);
+      throw error;
+    }
   },
   
   // Search for locations
   searchLocations: async (query: string): Promise<LocationSearchResult[]> => {
-    // Simulate API call delay
-    await new Promise(resolve => setTimeout(resolve, 400));
-    
-    // Filter locations based on the query
     if (!query) return [];
     
-    const filteredResults = mockLocationResults.filter(location => 
-      location.name.toLowerCase().includes(query.toLowerCase()) ||
-      location.region.toLowerCase().includes(query.toLowerCase()) ||
-      location.country.toLowerCase().includes(query.toLowerCase())
-    );
-    
-    return filteredResults;
+    try {
+      const response = await fetch(
+        `${BASE_URL}/search.json?key=${API_KEY}&q=${query}`
+      );
+      
+      if (!response.ok) {
+        throw new Error(`API error: ${response.status}`);
+      }
+      
+      const data = await response.json();
+      
+      // Transform API response to match our app's data structure
+      return data.map((location: any) => ({
+        id: `${location.lat},${location.lon}`, // Use coordinates as ID
+        name: location.name,
+        region: location.region,
+        country: location.country
+      }));
+    } catch (error) {
+      console.error('Error searching locations:', error);
+      throw error;
+    }
   }
 };
