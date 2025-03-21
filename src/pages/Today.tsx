@@ -6,7 +6,6 @@ import NavBar from '@/components/NavBar';
 import CurrentWeather from '@/components/CurrentWeather';
 import TodayDetails from '@/components/TodayDetails';
 import AirQualityIndicator from '@/components/AirQualityIndicator';
-import LocationInfo from '@/components/LocationInfo';
 import { Loader2 } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
@@ -84,7 +83,10 @@ const Today = () => {
   
   return (
     <div className="min-h-screen bg-gradient-to-b from-blue-50/50 to-blue-100/30 dark:from-gray-900 dark:to-gray-800">
-      <NavBar onLocationSelect={handleLocationSelect} />
+      <NavBar 
+        onLocationSelect={handleLocationSelect} 
+        currentLocation={weatherData?.location}
+      />
       
       <main className="container mx-auto px-4 sm:px-6 lg:px-8 pt-28 pb-16 max-w-7xl">
         {isLoading ? (
@@ -99,8 +101,7 @@ const Today = () => {
           </div>
         ) : weatherData ? (
           <div className="space-y-12">
-            {/* Location info */}
-            <LocationInfo location={weatherData.location} />
+            {/* Remove LocationInfo from here since it's now in the navbar */}
             
             {/* Current Weather and Air Quality Section */}
             <section>
