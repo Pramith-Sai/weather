@@ -1,11 +1,8 @@
-
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { WeatherIcon } from "@/components/WeatherIcon";
 import { CurrentWeather } from "@/lib/types";
 import { Droplets, Wind, Eye, Sunrise, Sunset, Compass, Gauge, ThermometerSun, CloudRain } from 'lucide-react';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer, AreaChart, Area } from 'recharts';
-import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
 
 interface TodayDetailsProps {
   data: CurrentWeather;
@@ -24,35 +21,10 @@ const TodayDetails = ({ data, hourlyData, sunrise, sunset }: TodayDetailsProps) 
     return "Extreme";
   };
 
-  // Filter hourly data to show only future hours
-  const currentHour = new Date().getHours();
-  
-  // Chart data configuration for temperature
-  const tempChartConfig = {
-    temperature: {
-      label: "Temperature",
-      theme: {
-        light: "#f97316",
-        dark: "#f97316",
-      }
-    }
-  };
-
-  // Chart data configuration for precipitation
-  const precipChartConfig = {
-    precipitation: {
-      label: "Chance of Rain",
-      theme: {
-        light: "#0ea5e9",
-        dark: "#0ea5e9",
-      }
-    }
-  };
-
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
       {/* Left column with main stats */}
-      <div className="lg:col-span-4 space-y-6">
+      <div className="space-y-6">
         {/* Wind Card */}
         <Card className="glass-panel card-hover">
           <CardHeader className="pb-2">
@@ -141,112 +113,8 @@ const TodayDetails = ({ data, hourlyData, sunrise, sunset }: TodayDetailsProps) 
         </Card>
       </div>
 
-      {/* Middle column with temperature chart and more stats */}
-      <div className="lg:col-span-4 space-y-6">
-        {/* Temperature Chart */}
-        <Card className="glass-panel card-hover">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">Temperature Forecast</CardTitle>
-          </CardHeader>
-          <CardContent className="h-[220px]">
-            <ChartContainer config={tempChartConfig} className="h-full">
-              <AreaChart data={hourlyData}>
-                <defs>
-                  <linearGradient id="temperatureGradient" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="var(--color-temperature)" stopOpacity={0.8}/>
-                    <stop offset="95%" stopColor="var(--color-temperature)" stopOpacity={0.1}/>
-                  </linearGradient>
-                </defs>
-                <CartesianGrid strokeDasharray="3 3" opacity={0.2} />
-                <XAxis 
-                  dataKey="time" 
-                  tick={{ fontSize: 10 }}
-                  interval={2}
-                />
-                <YAxis 
-                  tick={{ fontSize: 10 }}
-                  domain={['dataMin - 2', 'dataMax + 2']}
-                />
-                <ChartTooltip
-                  content={({ active, payload }) => {
-                    if (active && payload && payload.length) {
-                      return (
-                        <ChartTooltipContent
-                          className="bg-background/80 backdrop-blur-sm"
-                          payload={payload}
-                        />
-                      );
-                    }
-                    return null;
-                  }}
-                />
-                <Area 
-                  type="monotone" 
-                  dataKey="temperature" 
-                  stroke="var(--color-temperature)" 
-                  fillOpacity={1} 
-                  fill="url(#temperatureGradient)" 
-                />
-              </AreaChart>
-            </ChartContainer>
-          </CardContent>
-        </Card>
-
-        {/* Precipitation Chart */}
-        <Card className="glass-panel card-hover">
-          <CardHeader className="pb-2">
-            <CardTitle className="flex items-center text-sm font-medium">
-              <CloudRain size={16} className="mr-2 text-primary" /> Precipitation Chance
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="h-[220px]">
-            <ChartContainer config={precipChartConfig} className="h-full">
-              <AreaChart data={hourlyData}>
-                <defs>
-                  <linearGradient id="precipitationGradient" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="var(--color-precipitation)" stopOpacity={0.8}/>
-                    <stop offset="95%" stopColor="var(--color-precipitation)" stopOpacity={0.1}/>
-                  </linearGradient>
-                </defs>
-                <CartesianGrid strokeDasharray="3 3" opacity={0.2} />
-                <XAxis 
-                  dataKey="time" 
-                  tick={{ fontSize: 10 }}
-                  interval={2}
-                />
-                <YAxis 
-                  tick={{ fontSize: 10 }}
-                  domain={[0, 100]}
-                />
-                <ChartTooltip
-                  content={({ active, payload }) => {
-                    if (active && payload && payload.length) {
-                      return (
-                        <ChartTooltipContent
-                          className="bg-background/80 backdrop-blur-sm"
-                          payload={payload}
-                        />
-                      );
-                    }
-                    return null;
-                  }}
-                />
-                <Area 
-                  type="monotone" 
-                  dataKey="precipitationProbability" 
-                  name="precipitation"
-                  stroke="var(--color-precipitation)" 
-                  fillOpacity={1} 
-                  fill="url(#precipitationGradient)" 
-                />
-              </AreaChart>
-            </ChartContainer>
-          </CardContent>
-        </Card>
-      </div>
-
       {/* Right column with sun info and air quality */}
-      <div className="lg:col-span-4 space-y-6">
+      <div className="space-y-6">
         {/* Sun information Card */}
         <Card className="glass-panel card-hover">
           <CardHeader className="pb-2">

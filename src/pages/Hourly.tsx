@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react';
 import { weatherApi } from '@/lib/weatherApi';
 import { WeatherData } from '@/lib/types';
 import NavBar from '@/components/NavBar';
-import { Loader2, Umbrella } from 'lucide-react';
+import { Loader2, Umbrella, Wind } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { WeatherIcon } from '@/components/WeatherIcon';
@@ -83,7 +83,7 @@ const Hourly = () => {
     <div className="min-h-screen bg-gradient-to-b from-blue-50/50 to-blue-100/30 dark:from-gray-900 dark:to-gray-800">
       <NavBar onLocationSelect={handleLocationSelect} />
       
-      <main className="container mx-auto px-4 sm:px-6 lg:px-8 pt-28 pb-16 max-w-7xl">
+      <main className="container mx-auto px-4 sm:px-6 lg:px-8 pt-28 pb-16">
         {isLoading ? (
           <div className="flex flex-col items-center justify-center min-h-[60vh]">
             <Loader2 size={48} className="text-primary animate-spin mb-4" />
@@ -103,24 +103,30 @@ const Hourly = () => {
               </p>
             )}
             
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mt-8">
+            <div className="flex flex-col space-y-4 mt-8">
               {weatherData.forecast.hourly.map((hour, index) => (
-                <Card key={index} className="glass-panel card-hover">
+                <Card key={index} className="glass-panel card-hover w-full">
                   <CardContent className="p-4">
-                    <div className="flex justify-between items-center mb-2">
-                      <p className="font-medium">{hour.time}</p>
-                      <p className="text-2xl font-semibold">{hour.temperature}°</p>
-                    </div>
-                    <div className="flex items-center mb-4">
-                      <WeatherIcon condition={hour.condition} size={32} />
-                      <span className="ml-2 text-sm">{hour.conditionText}</span>
-                    </div>
-                    <div className="grid grid-cols-2 gap-2 text-sm text-muted-foreground">
-                      <div className="flex items-center">
-                        <Umbrella size={14} className="mr-1" />
-                        <span>{hour.precipitationProbability}%</span>
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center space-x-4">
+                        <p className="font-medium text-lg">{hour.time}</p>
+                        <WeatherIcon condition={hour.condition} size={36} />
                       </div>
-                      <div>Wind: {hour.windSpeed} mph</div>
+                      <p className="text-3xl font-semibold">{hour.temperature}°</p>
+                    </div>
+                    
+                    <div className="mt-4 grid grid-cols-3 gap-4">
+                      <div className="flex items-center">
+                        <Umbrella size={16} className="mr-2 text-blue-500" />
+                        <span>{hour.precipitationProbability}% chance</span>
+                      </div>
+                      <div className="flex items-center">
+                        <Wind size={16} className="mr-2 text-blue-500" />
+                        <span>{hour.windSpeed} mph</span>
+                      </div>
+                      <div className="flex items-center">
+                        <span className="text-sm text-muted-foreground">{hour.conditionText}</span>
+                      </div>
                     </div>
                   </CardContent>
                 </Card>
