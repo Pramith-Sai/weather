@@ -1,3 +1,4 @@
+
 // Weather condition types
 export type WeatherCondition = 
   | 'clear' 
@@ -30,12 +31,14 @@ export interface CurrentWeather {
   feelsLike: number;
   condition: WeatherCondition;
   conditionText: string;
+  conditionIcon?: string;
   windSpeed: number;
   windDirection: string;
   humidity: number;
   uvIndex: number;
   visibility: number;
   pressure: number;
+  precipitation?: number;
   precipitationProbability: number;
   lastUpdated: string;
   airQuality?: AirQuality;
@@ -47,8 +50,12 @@ export interface DailyForecast {
   day: {
     condition: WeatherCondition;
     conditionText: string;
+    conditionIcon?: string;
     maxTemp: number;
     minTemp: number;
+    avgTemp?: number;
+    maxWindSpeed?: number;
+    precipitation?: number;
     precipitationProbability: number;
     sunrise: string;
     sunset: string;
@@ -66,12 +73,15 @@ export interface HourlyForecast {
   temperature: number;
   condition: WeatherCondition;
   conditionText: string;
+  conditionIcon?: string;
   precipitationProbability: number;
   windSpeed: number;
+  windDirection?: string;
 }
 
 // Location data structure
 export interface Location {
+  id?: string;
   name: string;
   region: string;
   country: string;
@@ -97,6 +107,8 @@ export interface LocationSearchResult {
   name: string;
   region: string;
   country: string;
+  latitude: number;
+  longitude: number;
 }
 
 export type AuthSession = {
