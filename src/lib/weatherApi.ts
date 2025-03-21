@@ -1,4 +1,4 @@
-import { LocationSearchResult, WeatherData } from './types';
+import { LocationSearchResult, WeatherData, WeatherCondition } from './types';
 
 // Mock data for the weather API
 const mockWeatherApi = {
@@ -9,8 +9,9 @@ const mockWeatherApi = {
       name: "New Delhi",
       region: "Delhi",
       country: "India",
-      lat: 28.61,
-      lon: 77.21,
+      latitude: 28.61,
+      longitude: 77.21,
+      timezone: "Asia/Kolkata",
       localTime: new Date().toLocaleTimeString('en-US', { 
         hour: 'numeric', 
         minute: 'numeric',
@@ -23,8 +24,9 @@ const mockWeatherApi = {
       name: 'London',
       region: 'City of London, Greater London',
       country: 'United Kingdom',
-      lat: 51.52,
-      lon: -0.11,
+      latitude: 51.52,
+      longitude: -0.11,
+      timezone: "Europe/London",
       localTime: new Date().toLocaleTimeString('en-US', {
         hour: 'numeric',
         minute: 'numeric',
@@ -44,6 +46,10 @@ const mockWeatherApi = {
       feelsLike: 22,
       visibility: 10,
       uvIndex: 7,
+      condition: 'partly-cloudy' as WeatherCondition,
+      pressure: 1012,
+      precipitationProbability: 10,
+      lastUpdated: "10 minutes ago",
       airQuality: {
         co: 200,
         no2: 20,
@@ -51,7 +57,9 @@ const mockWeatherApi = {
         so2: 10,
         pm2_5: 8,
         pm10: 15,
-        index: 2
+        index: 2,
+        level: "Good",
+        color: "#4CAF50"
       }
     };
 
@@ -69,7 +77,13 @@ const mockWeatherApi = {
             conditionText: 'Partly Cloudy',
             conditionIcon: '//cdn.weatherapi.com/weather/64x64/day/116.png',
             sunrise: '05:30 AM',
-            sunset: '08:30 PM'
+            sunset: '08:30 PM',
+            condition: 'partly-cloudy' as WeatherCondition
+          },
+          night: {
+            condition: 'clear' as WeatherCondition,
+            conditionText: 'Clear',
+            precipitationProbability: 5
           }
         },
         {
@@ -84,7 +98,13 @@ const mockWeatherApi = {
             conditionText: 'Sunny',
             conditionIcon: '//cdn.weatherapi.com/weather/64x64/day/113.png',
             sunrise: '05:31 AM',
-            sunset: '08:29 PM'
+            sunset: '08:29 PM',
+            condition: 'clear' as WeatherCondition
+          },
+          night: {
+            condition: 'clear' as WeatherCondition,
+            conditionText: 'Clear',
+            precipitationProbability: 0
           }
         },
         {
@@ -99,7 +119,13 @@ const mockWeatherApi = {
             conditionText: 'Sunny',
             conditionIcon: '//cdn.weatherapi.com/weather/64x64/day/113.png',
             sunrise: '05:32 AM',
-            sunset: '08:28 PM'
+            sunset: '08:28 PM',
+            condition: 'clear' as WeatherCondition
+          },
+          night: {
+            condition: 'clear' as WeatherCondition,
+            conditionText: 'Clear',
+            precipitationProbability: 0
           }
         },
         {
@@ -114,7 +140,13 @@ const mockWeatherApi = {
             conditionText: 'Sunny',
             conditionIcon: '//cdn.weatherapi.com/weather/64x64/day/113.png',
             sunrise: '05:33 AM',
-            sunset: '08:27 PM'
+            sunset: '08:27 PM',
+            condition: 'clear' as WeatherCondition
+          },
+          night: {
+            condition: 'clear' as WeatherCondition,
+            conditionText: 'Clear',
+            precipitationProbability: 0
           }
         },
         {
@@ -129,7 +161,13 @@ const mockWeatherApi = {
             conditionText: 'Partly Cloudy',
             conditionIcon: '//cdn.weatherapi.com/weather/64x64/day/116.png',
             sunrise: '05:34 AM',
-            sunset: '08:26 PM'
+            sunset: '08:26 PM',
+            condition: 'partly-cloudy' as WeatherCondition
+          },
+          night: {
+            condition: 'partly-cloudy' as WeatherCondition,
+            conditionText: 'Partly Cloudy',
+            precipitationProbability: 10
           }
         },
         {
@@ -144,7 +182,13 @@ const mockWeatherApi = {
             conditionText: 'Light Rain',
             conditionIcon: '//cdn.weatherapi.com/weather/64x64/day/302.png',
             sunrise: '05:35 AM',
-            sunset: '08:25 PM'
+            sunset: '08:25 PM',
+            condition: 'rain' as WeatherCondition
+          },
+          night: {
+            condition: 'showers' as WeatherCondition,
+            conditionText: 'Showers',
+            precipitationProbability: 30
           }
         },
         {
@@ -159,7 +203,13 @@ const mockWeatherApi = {
             conditionText: 'Moderate Rain',
             conditionIcon: '//cdn.weatherapi.com/weather/64x64/day/305.png',
             sunrise: '05:36 AM',
-            sunset: '08:24 PM'
+            sunset: '08:24 PM',
+            condition: 'rain' as WeatherCondition
+          },
+          night: {
+            condition: 'rain' as WeatherCondition,
+            conditionText: 'Rain',
+            precipitationProbability: 40
           }
         }
       ],
@@ -171,7 +221,8 @@ const mockWeatherApi = {
           conditionIcon: '//cdn.weatherapi.com/weather/64x64/day/116.png',
           windSpeed: 10,
           windDirection: 'ESE',
-          precipitationProbability: 10
+          precipitationProbability: 10,
+          condition: 'partly-cloudy' as WeatherCondition
         },
         {
           time: '01:00 AM',
@@ -180,7 +231,8 @@ const mockWeatherApi = {
           conditionIcon: '//cdn.weatherapi.com/weather/64x64/day/116.png',
           windSpeed: 9,
           windDirection: 'ESE',
-          precipitationProbability: 8
+          precipitationProbability: 8,
+          condition: 'partly-cloudy' as WeatherCondition
         },
         {
           time: '02:00 AM',
@@ -189,7 +241,8 @@ const mockWeatherApi = {
           conditionIcon: '//cdn.weatherapi.com/weather/64x64/day/113.png',
           windSpeed: 8,
           windDirection: 'ESE',
-          precipitationProbability: 5
+          precipitationProbability: 5,
+          condition: 'clear' as WeatherCondition
         },
         {
           time: '03:00 AM',
@@ -198,7 +251,8 @@ const mockWeatherApi = {
           conditionIcon: '//cdn.weatherapi.com/weather/64x64/day/113.png',
           windSpeed: 7,
           windDirection: 'ESE',
-          precipitationProbability: 3
+          precipitationProbability: 3,
+          condition: 'clear' as WeatherCondition
         },
         {
           time: '04:00 AM',
@@ -207,7 +261,8 @@ const mockWeatherApi = {
           conditionIcon: '//cdn.weatherapi.com/weather/64x64/day/113.png',
           windSpeed: 6,
           windDirection: 'ESE',
-          precipitationProbability: 2
+          precipitationProbability: 2,
+          condition: 'clear' as WeatherCondition
         },
         {
           time: '05:00 AM',
@@ -216,7 +271,8 @@ const mockWeatherApi = {
           conditionIcon: '//cdn.weatherapi.com/weather/64x64/day/113.png',
           windSpeed: 5,
           windDirection: 'ESE',
-          precipitationProbability: 1
+          precipitationProbability: 1,
+          condition: 'clear' as WeatherCondition
         },
         {
           time: '06:00 AM',
@@ -225,7 +281,8 @@ const mockWeatherApi = {
           conditionIcon: '//cdn.weatherapi.com/weather/64x64/day/113.png',
           windSpeed: 6,
           windDirection: 'ESE',
-          precipitationProbability: 0
+          precipitationProbability: 0,
+          condition: 'clear' as WeatherCondition
         },
         {
           time: '07:00 AM',
@@ -234,7 +291,8 @@ const mockWeatherApi = {
           conditionIcon: '//cdn.weatherapi.com/weather/64x64/day/113.png',
           windSpeed: 7,
           windDirection: 'ESE',
-          precipitationProbability: 0
+          precipitationProbability: 0,
+          condition: 'clear' as WeatherCondition
         },
         {
           time: '08:00 AM',
@@ -243,7 +301,8 @@ const mockWeatherApi = {
           conditionIcon: '//cdn.weatherapi.com/weather/64x64/day/113.png',
           windSpeed: 8,
           windDirection: 'ESE',
-          precipitationProbability: 0
+          precipitationProbability: 0,
+          condition: 'clear' as WeatherCondition
         },
         {
           time: '09:00 AM',
@@ -252,7 +311,8 @@ const mockWeatherApi = {
           conditionIcon: '//cdn.weatherapi.com/weather/64x64/day/113.png',
           windSpeed: 9,
           windDirection: 'ESE',
-          precipitationProbability: 0
+          precipitationProbability: 0,
+          condition: 'clear' as WeatherCondition
         },
         {
           time: '10:00 AM',
@@ -261,7 +321,8 @@ const mockWeatherApi = {
           conditionIcon: '//cdn.weatherapi.com/weather/64x64/day/113.png',
           windSpeed: 10,
           windDirection: 'ESE',
-          precipitationProbability: 0
+          precipitationProbability: 0,
+          condition: 'clear' as WeatherCondition
         },
         {
           time: '11:00 AM',
@@ -270,7 +331,8 @@ const mockWeatherApi = {
           conditionIcon: '//cdn.weatherapi.com/weather/64x64/day/113.png',
           windSpeed: 11,
           windDirection: 'ESE',
-          precipitationProbability: 0
+          precipitationProbability: 0,
+          condition: 'clear' as WeatherCondition
         },
         {
           time: '12:00 PM',
@@ -279,7 +341,8 @@ const mockWeatherApi = {
           conditionIcon: '//cdn.weatherapi.com/weather/64x64/day/113.png',
           windSpeed: 12,
           windDirection: 'ESE',
-          precipitationProbability: 0
+          precipitationProbability: 0,
+          condition: 'clear' as WeatherCondition
         },
         {
           time: '01:00 PM',
@@ -288,7 +351,8 @@ const mockWeatherApi = {
           conditionIcon: '//cdn.weatherapi.com/weather/64x64/day/113.png',
           windSpeed: 13,
           windDirection: 'ESE',
-          precipitationProbability: 0
+          precipitationProbability: 0,
+          condition: 'clear' as WeatherCondition
         },
         {
           time: '02:00 PM',
@@ -297,7 +361,8 @@ const mockWeatherApi = {
           conditionIcon: '//cdn.weatherapi.com/weather/64x64/day/113.png',
           windSpeed: 14,
           windDirection: 'ESE',
-          precipitationProbability: 0
+          precipitationProbability: 0,
+          condition: 'clear' as WeatherCondition
         },
         {
           time: '03:00 PM',
@@ -306,7 +371,8 @@ const mockWeatherApi = {
           conditionIcon: '//cdn.weatherapi.com/weather/64x64/day/113.png',
           windSpeed: 13,
           windDirection: 'ESE',
-          precipitationProbability: 0
+          precipitationProbability: 0,
+          condition: 'clear' as WeatherCondition
         },
         {
           time: '04:00 PM',
@@ -315,7 +381,8 @@ const mockWeatherApi = {
           conditionIcon: '//cdn.weatherapi.com/weather/64x64/day/113.png',
           windSpeed: 12,
           windDirection: 'ESE',
-          precipitationProbability: 0
+          precipitationProbability: 0,
+          condition: 'clear' as WeatherCondition
         },
         {
           time: '05:00 PM',
@@ -324,7 +391,8 @@ const mockWeatherApi = {
           conditionIcon: '//cdn.weatherapi.com/weather/64x64/day/113.png',
           windSpeed: 11,
           windDirection: 'ESE',
-          precipitationProbability: 0
+          precipitationProbability: 0,
+          condition: 'clear' as WeatherCondition
         },
         {
           time: '06:00 PM',
@@ -333,7 +401,8 @@ const mockWeatherApi = {
           conditionIcon: '//cdn.weatherapi.com/weather/64x64/day/116.png',
           windSpeed: 10,
           windDirection: 'ESE',
-          precipitationProbability: 5
+          precipitationProbability: 5,
+          condition: 'partly-cloudy' as WeatherCondition
         },
         {
           time: '07:00 PM',
@@ -342,7 +411,8 @@ const mockWeatherApi = {
           conditionIcon: '//cdn.weatherapi.com/weather/64x64/day/116.png',
           windSpeed: 9,
           windDirection: 'ESE',
-          precipitationProbability: 8
+          precipitationProbability: 8,
+          condition: 'partly-cloudy' as WeatherCondition
         },
         {
           time: '08:00 PM',
@@ -351,7 +421,8 @@ const mockWeatherApi = {
           conditionIcon: '//cdn.weatherapi.com/weather/64x64/day/116.png',
           windSpeed: 8,
           windDirection: 'ESE',
-          precipitationProbability: 10
+          precipitationProbability: 10,
+          condition: 'partly-cloudy' as WeatherCondition
         },
         {
           time: '09:00 PM',
@@ -360,7 +431,8 @@ const mockWeatherApi = {
           conditionIcon: '//cdn.weatherapi.com/weather/64x64/day/116.png',
           windSpeed: 7,
           windDirection: 'ESE',
-          precipitationProbability: 12
+          precipitationProbability: 12,
+          condition: 'partly-cloudy' as WeatherCondition
         },
         {
           time: '10:00 PM',
@@ -369,7 +441,8 @@ const mockWeatherApi = {
           conditionIcon: '//cdn.weatherapi.com/weather/64x64/day/116.png',
           windSpeed: 6,
           windDirection: 'ESE',
-          precipitationProbability: 10
+          precipitationProbability: 10,
+          condition: 'partly-cloudy' as WeatherCondition
         },
         {
           time: '11:00 PM',
@@ -378,7 +451,8 @@ const mockWeatherApi = {
           conditionIcon: '//cdn.weatherapi.com/weather/64x64/day/116.png',
           windSpeed: 5,
           windDirection: 'ESE',
-          precipitationProbability: 8
+          precipitationProbability: 8,
+          condition: 'partly-cloudy' as WeatherCondition
         }
       ]
     };
@@ -397,24 +471,24 @@ const mockWeatherApi = {
         name: 'London',
         region: 'City of London, Greater London',
         country: 'United Kingdom',
-        lat: 51.52,
-        lon: -0.11
+        latitude: 51.52,
+        longitude: -0.11
       },
       {
         id: '1261481',
         name: 'New Delhi',
         region: 'Delhi',
         country: 'India',
-        lat: 28.61,
-        lon: 77.21
+        latitude: 28.61,
+        longitude: 77.21
       },
       {
         id: '4119615',
         name: 'Delhi',
         region: 'LA',
         country: 'United States of America',
-        lat: 33.73,
-        lon: -117.93
+        latitude: 33.73,
+        longitude: -117.93
       }
     ];
 
