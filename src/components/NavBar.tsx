@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { Menu, X, Moon, Sun, User, LogOut } from 'lucide-react';
@@ -26,7 +25,6 @@ const NavBar = ({
   const navigate = useNavigate();
   const location = useLocation();
 
-  // Handle scroll event to change navbar appearance
   useEffect(() => {
     const handleScroll = () => {
       if (window.scrollY > 10) {
@@ -39,7 +37,6 @@ const NavBar = ({
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  // Toggle theme between light and dark
   const toggleTheme = () => {
     const newTheme = theme === 'light' ? 'dark' : 'light';
     setTheme(newTheme);
@@ -51,7 +48,6 @@ const NavBar = ({
     navigate('/');
   };
   
-  // Check if a path is active
   const isActive = (path: string) => {
     return location.pathname === path;
   };
@@ -59,21 +55,18 @@ const NavBar = ({
   return <header className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${isScrolled ? 'bg-white/80 dark:bg-gray-900/80 backdrop-blur-lg shadow-sm' : 'bg-transparent'}`}>
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
-          {/* Logo */}
           <div className="flex-shrink-0 flex items-center">
             <Link to="/" className="text-2xl font-semibold bg-clip-text text-transparent bg-gradient-to-r from-primary to-blue-400">
               Weather
             </Link>
           </div>
           
-          {/* Location Info - Added for desktop */}
           {currentLocation && (
-            <div className="hidden md:flex ml-4">
+            <div className="hidden sm:flex mx-4 flex-1 justify-center">
               <LocationInfo location={currentLocation} />
             </div>
           )}
           
-          {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center space-x-8">
             <Link 
               to="/today" 
@@ -101,7 +94,6 @@ const NavBar = ({
             </Link>
           </nav>
           
-          {/* Search and Auth Controls */}
           <div className="hidden md:flex items-center space-x-4">
             <div className="w-64">
               <SearchBar onLocationSelect={onLocationSelect} />
@@ -117,9 +109,7 @@ const NavBar = ({
               </Button>}
           </div>
           
-          {/* Mobile Menu Button */}
           <div className="md:hidden flex items-center">
-            {/* Location Info - Added for mobile */}
             {currentLocation && (
               <div className="mr-2">
                 <LocationInfo location={currentLocation} />
@@ -132,7 +122,6 @@ const NavBar = ({
         </div>
       </div>
       
-      {/* Mobile Menu */}
       {isMobileMenuOpen && <div className="md:hidden glass-panel animate-fade-in">
           <div className="px-4 pt-2 pb-4 space-y-4">
             <SearchBar onLocationSelect={onLocationSelect} />

@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { weatherApi } from '@/lib/weatherApi';
 import { WeatherData } from '@/lib/types';
@@ -14,7 +13,6 @@ const Radar = () => {
   const [error, setError] = useState<string | null>(null);
   const { session } = useAuth();
   
-  // Fetch user's saved location if logged in
   useEffect(() => {
     const fetchUserLocation = async () => {
       if (session.user && !session.isLoading) {
@@ -44,7 +42,6 @@ const Radar = () => {
     fetchUserLocation();
   }, [session.user, session.isLoading]);
   
-  // Fetch weather data
   const fetchWeather = async (locationId?: string) => {
     setIsLoading(true);
     setError(null);
@@ -59,9 +56,7 @@ const Radar = () => {
     }
   };
   
-  // Handle location selection from search
   const handleLocationSelect = async (locationId: string) => {
-    // Save the selected location for logged in users
     if (session.user) {
       try {
         const { error } = await supabase
@@ -80,7 +75,10 @@ const Radar = () => {
   
   return (
     <div className="min-h-screen bg-gradient-to-b from-blue-50/50 to-blue-100/30 dark:from-gray-900 dark:to-gray-800">
-      <NavBar onLocationSelect={handleLocationSelect} />
+      <NavBar 
+        onLocationSelect={handleLocationSelect} 
+        currentLocation={weatherData?.location}
+      />
       
       <main className="container mx-auto px-4 sm:px-6 lg:px-8 pt-28 pb-16 max-w-7xl">
         {isLoading ? (
@@ -141,7 +139,6 @@ const Radar = () => {
         ) : null}
       </main>
       
-      {/* Footer */}
       <footer className="bg-white/50 dark:bg-gray-900/50 backdrop-blur-sm py-8 border-t border-gray-200 dark:border-gray-800">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row justify-between items-center">
           <div className="mb-4 sm:mb-0">
