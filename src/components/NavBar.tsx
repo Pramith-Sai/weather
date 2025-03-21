@@ -5,7 +5,6 @@ import { Menu, X, Moon, Sun, User, LogOut } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import SearchBar from './SearchBar';
 import { useAuth } from '@/context/AuthContext';
-import LocationInfo from './LocationInfo';
 
 interface NavBarProps {
   onLocationSelect: (locationId: string) => void;
@@ -66,12 +65,7 @@ const NavBar = ({
             </Link>
           </div>
           
-          {/* Location Info - Added for desktop */}
-          {currentLocation && (
-            <div className="hidden md:flex ml-4">
-              <LocationInfo location={currentLocation} />
-            </div>
-          )}
+          {/* Removed LocationInfo from here */}
           
           {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center space-x-8">
@@ -119,12 +113,7 @@ const NavBar = ({
           
           {/* Mobile Menu Button */}
           <div className="md:hidden flex items-center">
-            {/* Location Info - Added for mobile */}
-            {currentLocation && (
-              <div className="mr-2">
-                <LocationInfo location={currentLocation} />
-              </div>
-            )}
+            {/* Removed LocationInfo from here */}
             <Button variant="ghost" size="icon" className="rounded-full" onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}>
               {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
             </Button>
