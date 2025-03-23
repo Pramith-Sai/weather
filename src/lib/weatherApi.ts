@@ -1,3 +1,4 @@
+
 import { WeatherData, LocationSearchResult, WeatherCondition } from './types';
 
 // API key for WeatherAPI.com
@@ -38,7 +39,7 @@ export const weatherApi = {
   // Get current weather and forecast for a location
   getWeather: async (locationId?: string): Promise<WeatherData> => {
     try {
-      const query = locationId || 'Delhi'; // Default to Delhi if no location provided
+      const query = locationId || 'New Delhi'; // Changed default from Delhi to New Delhi
       const response = await fetch(
         `${BASE_URL}/forecast.json?key=${API_KEY}&q=${query}&days=7&aqi=yes&alerts=no`
       );
