@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { Menu, X, Moon, Sun, User, LogOut } from 'lucide-react';
@@ -8,12 +7,10 @@ import { useAuth } from '@/context/AuthContext';
 
 interface NavBarProps {
   onLocationSelect: (locationId: string) => void;
-  currentLocation?: any;
 }
 
 const NavBar = ({
-  onLocationSelect,
-  currentLocation
+  onLocationSelect
 }: NavBarProps) => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -55,7 +52,8 @@ const NavBar = ({
     return location.pathname === path;
   };
   
-  return <header className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${isScrolled ? 'bg-white/80 dark:bg-gray-900/80 backdrop-blur-lg shadow-sm' : 'bg-transparent'}`}>
+  return (
+    <header className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${isScrolled ? 'bg-white/80 dark:bg-gray-900/80 backdrop-blur-lg shadow-sm' : 'bg-transparent'}`}>
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
@@ -64,8 +62,6 @@ const NavBar = ({
               Weather
             </Link>
           </div>
-          
-          {/* Removed LocationInfo from here */}
           
           {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center space-x-8">
@@ -113,7 +109,6 @@ const NavBar = ({
           
           {/* Mobile Menu Button */}
           <div className="md:hidden flex items-center">
-            {/* Removed LocationInfo from here */}
             <Button variant="ghost" size="icon" className="rounded-full" onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}>
               {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
             </Button>
@@ -122,7 +117,8 @@ const NavBar = ({
       </div>
       
       {/* Mobile Menu */}
-      {isMobileMenuOpen && <div className="md:hidden glass-panel animate-fade-in">
+      {isMobileMenuOpen && (
+        <div className="md:hidden glass-panel animate-fade-in">
           <div className="px-4 pt-2 pb-4 space-y-4">
             <SearchBar onLocationSelect={onLocationSelect} />
             
@@ -168,8 +164,10 @@ const NavBar = ({
               </div>
             </div>
           </div>
-        </div>}
-    </header>;
+        </div>
+      )}
+    </header>
+  );
 };
 
 export default NavBar;

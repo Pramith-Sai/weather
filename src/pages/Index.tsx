@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { weatherApi } from '@/lib/weatherApi';
 import { WeatherData } from '@/lib/types';
@@ -9,48 +8,31 @@ import { Loader2 } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 
-const Index = () => {
+interface IndexProps {
+  onLocationSelect: (locationId: string) => void;
+  locationId?: string;
+}
+
+const Index = ({ onLocationSelect, locationId }: IndexProps) => {
   const [weatherData, setWeatherData] = useState<WeatherData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const { session } = useAuth();
   
-  // Fetch user's saved location if logged in
+  // Fetch weather when locationId changes
   useEffect(() => {
-    const fetchUserLocation = async () => {
-      if (session.user && !session.isLoading) {
-        try {
-          const { data, error } = await supabase
-            .from('profiles')
-            .select('location_id')
-            .eq('id', session.user.id)
-            .single();
-            
-          if (error) throw error;
-          
-          if (data && data.location_id) {
-            fetchWeather(data.location_id);
-          } else {
-            fetchWeather(); // Use default location
-          }
-        } catch (err) {
-          console.error('Error fetching user location:', err);
-          fetchWeather(); // Use default location on error
-        }
-      } else {
-        fetchWeather(); // Use default location if not logged in
-      }
-    };
-    
-    fetchUserLocation();
-  }, [session.user, session.isLoading]);
+    if (locationId) {
+      fetchWeather(locationId);
+    } else {
+      fetchWeather(); // Use default location if no locationId is provided
+    }
+  }, [locationId]);
   
   // Fetch weather data
-  const fetchWeather = async (locationId?: string) => {
+  const fetchWeather = async (id?: string) => {
     setIsLoading(true);
     setError(null);
     try {
-      const data = await weatherApi.getWeather(locationId);
+      const data = await weatherApi.getWeather(id);
       setWeatherData(data);
     } catch (err) {
       console.error('Error fetching weather data:', err);
@@ -60,28 +42,9 @@ const Index = () => {
     }
   };
   
-  // Handle location selection from search
-  const handleLocationSelect = async (locationId: string) => {
-    // Save the selected location for logged in users
-    if (session.user) {
-      try {
-        const { error } = await supabase
-          .from('profiles')
-          .update({ location_id: locationId })
-          .eq('id', session.user.id);
-          
-        if (error) throw error;
-      } catch (err) {
-        console.error('Error saving location:', err);
-      }
-    }
-    
-    fetchWeather(locationId);
-  };
-  
   return (
     <div className="min-h-screen bg-gradient-to-b from-blue-50/50 to-blue-100/30 dark:from-gray-900 dark:to-gray-800">
-      <NavBar onLocationSelect={handleLocationSelect} />
+      <NavBar onLocationSelect={onLocationSelect} />
       
       <main className="container mx-auto px-4 sm:px-6 lg:px-8 pt-28 pb-16 max-w-7xl">
         {isLoading ? (
