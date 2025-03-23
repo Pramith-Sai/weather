@@ -5,6 +5,9 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { LocationSearchResult } from '@/lib/types';
 import { weatherApi } from '@/lib/weatherApi';
+import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/context/AuthContext';
+import { toast } from 'sonner';
 
 interface SearchBarProps {
   onLocationSelect: (locationId: string) => void;
@@ -17,6 +20,7 @@ const SearchBar = ({ onLocationSelect }: SearchBarProps) => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const searchRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const { session } = useAuth();
   
   // Handle search query changes
   useEffect(() => {
@@ -66,10 +70,29 @@ const SearchBar = ({ onLocationSelect }: SearchBarProps) => {
   };
   
   // Handle location selection
-  const handleLocationSelect = (locationId: string) => {
+  const handleLocationSelect = async (locationId: string) => {
     onLocationSelect(locationId);
     setIsDropdownOpen(false);
     setSearchQuery('');
+    
+    // Save the selected location to the user profile if logged in
+    if (session?.user) {
+      try {
+        const { error } = await supabase
+          .from('profiles')
+          .update({ location_id: locationId })
+          .eq('id', session.user.id);
+          
+        if (error) {
+          throw error;
+        }
+        
+        toast.success("Location saved to your profile");
+      } catch (err) {
+        console.error('Error saving location:', err);
+        toast.error("Couldn't save location to your profile");
+      }
+    }
   };
   
   return (
