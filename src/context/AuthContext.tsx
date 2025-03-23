@@ -1,3 +1,4 @@
+
 import { createContext, useState, useEffect, useContext, ReactNode } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { AuthSession } from '@/lib/types';
@@ -8,6 +9,7 @@ type AuthContextType = {
   signIn: (email: string, password: string) => Promise<void>;
   signUp: (email: string, password: string) => Promise<void>;
   signOut: () => Promise<void>;
+  resetPassword: (email: string) => Promise<void>;
 };
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -75,6 +77,22 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
+  const resetPassword = async (email: string) => {
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: window.location.origin + '/auth',
+      });
+      if (error) throw error;
+    } catch (error: any) {
+      toast({
+        title: "Password reset failed",
+        description: error.message || "Something went wrong",
+        variant: "destructive"
+      });
+      throw error;
+    }
+  };
+
   const signOut = async () => {
     try {
       const { error } = await supabase.auth.signOut();
@@ -89,7 +107,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ session, signIn, signUp, signOut }}>
+    <AuthContext.Provider value={{ session, signIn, signUp, signOut, resetPassword }}>
       {children}
     </AuthContext.Provider>
   );
