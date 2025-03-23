@@ -59,7 +59,7 @@ const AppContent = () => {
         <Route path="/today" element={<Today onLocationSelect={handleLocationSelect} locationId={locationId} />} />
         <Route path="/hourly" element={<Hourly onLocationSelect={handleLocationSelect} locationId={locationId} />} />
         <Route path="/seven-day" element={<SevenDay onLocationSelect={handleLocationSelect} locationId={locationId} />} />
-        <Route path="/radar" element={<Radar />} />
+        <Route path="/radar" element={<Radar onLocationSelect={handleLocationSelect} locationId={locationId} />} />
         <Route path="/auth" element={<Auth />} />
         {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
         <Route path="*" element={<NotFound />} />
