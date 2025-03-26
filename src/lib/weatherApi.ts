@@ -41,6 +41,7 @@ const getAirQualityInfo = (aqi: number) => {
 // Helper function to fetch air quality data from Air Ninjas API
 const fetchAirQuality = async (cityName: string): Promise<AirQuality | null> => {
   try {
+    console.log(`Fetching air quality for: ${cityName}`);
     const response = await fetch(
       `${AIR_NINJAS_BASE_URL}/airquality?city=${encodeURIComponent(cityName)}`,
       {
@@ -56,6 +57,7 @@ const fetchAirQuality = async (cityName: string): Promise<AirQuality | null> => 
     }
     
     const data = await response.json();
+    console.log("Air Ninjas API response:", data);
     
     // Calculate overall AQI based on the highest individual index
     // Using US EPA index calculation method

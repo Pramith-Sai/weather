@@ -48,7 +48,7 @@ const AirQualityIndicator = ({ airQuality, size = 'md' }: AirQualityIndicatorPro
                     301+: Hazardous
                   </li>
                 </ul>
-                {airQuality.pm2_5 && (
+                {airQuality.pm2_5 !== null && airQuality.pm2_5 !== undefined && (
                   <p className="text-xs">PM2.5: {airQuality.pm2_5} μg/m³</p>
                 )}
               </div>
