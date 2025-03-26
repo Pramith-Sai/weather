@@ -77,20 +77,20 @@ export const fetchAirQuality = async (cityName: string): Promise<AirQuality | nu
   }
 };
 
-// Extract air quality data from WeatherAPI as fallback
+// We no longer need this function as we're not using WeatherAPI anymore
 export const extractWeatherApiAirQuality = (apiAirQuality: any): AirQuality => {
-  const aqiUS = Math.round(apiAirQuality['us-epa-index'] || 1);
+  const aqiUS = Math.round(1); // Default to 1
   const aqiInfo = getAirQualityInfo(aqiUS);
   
   return {
     index: aqiUS,
     level: aqiInfo.level,
     color: aqiInfo.color,
-    co: apiAirQuality.co ? parseFloat(apiAirQuality.co.toFixed(2)) : null,
-    no2: apiAirQuality.no2 ? parseFloat(apiAirQuality.no2.toFixed(2)) : null,
-    o3: apiAirQuality.o3 ? parseFloat(apiAirQuality.o3.toFixed(2)) : null,
-    pm2_5: apiAirQuality.pm2_5 ? parseFloat(apiAirQuality.pm2_5.toFixed(2)) : null,
-    pm10: apiAirQuality.pm10 ? parseFloat(apiAirQuality.pm10.toFixed(2)) : null,
-    so2: apiAirQuality.so2 ? parseFloat(apiAirQuality.so2.toFixed(2)) : null,
+    co: null,
+    no2: null,
+    o3: null,
+    pm2_5: null,
+    pm10: null,
+    so2: null,
   };
 };
