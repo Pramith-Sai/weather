@@ -27,6 +27,7 @@ const AirQualityIndicator = ({ airQuality, size = 'md' }: AirQualityIndicatorPro
             <TooltipContent className="max-w-80">
               <div className="space-y-2">
                 <p className="font-medium text-sm">Air Quality Index (US EPA)</p>
+                <p className="text-xs mb-2">Data from Air Ninjas API with WeatherAPI fallback</p>
                 <ul className="text-xs space-y-1">
                   <li><span className="inline-block w-3 h-3 rounded-full bg-[#4ade80] mr-2"></span>
                     0-50: Good

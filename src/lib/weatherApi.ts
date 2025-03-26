@@ -1,9 +1,13 @@
 
-import { WeatherData, LocationSearchResult, WeatherCondition } from './types';
+import { WeatherData, LocationSearchResult, WeatherCondition, AirQuality } from './types';
 
 // API key for WeatherAPI.com
 const API_KEY = '995b07fb34e84840914160220251903';
 const BASE_URL = 'https://api.weatherapi.com/v1';
+
+// API key for Air Ninjas
+const AIR_NINJAS_API_KEY = 'SMI5PxUWBSfc2sKaEG5ttg==XYct9CGH2LSTtRCT';
+const AIR_NINJAS_BASE_URL = 'https://api.api-ninjas.com/v1';
 
 // Helper function to map API weather conditions to our app's condition types
 const mapWeatherCondition = (code: number): WeatherCondition => {
@@ -34,6 +38,66 @@ const getAirQualityInfo = (aqi: number) => {
   return { level: 'Hazardous', color: '#7f1d1d' }; // Dark Red/Maroon
 };
 
+// Helper function to fetch air quality data from Air Ninjas API
+const fetchAirQuality = async (cityName: string): Promise<AirQuality | null> => {
+  try {
+    const response = await fetch(
+      `${AIR_NINJAS_BASE_URL}/airquality?city=${encodeURIComponent(cityName)}`,
+      {
+        headers: {
+          'X-Api-Key': AIR_NINJAS_API_KEY
+        }
+      }
+    );
+    
+    if (!response.ok) {
+      console.error(`Air quality API error: ${response.status}`);
+      return null;
+    }
+    
+    const data = await response.json();
+    
+    // Calculate overall AQI based on the highest individual index
+    // Using US EPA index calculation method
+    const pollutants = {
+      pm2_5: data.PM2_5 ? parseFloat(data.PM2_5.concentration.toFixed(2)) : null,
+      pm10: data.PM10 ? parseFloat(data.PM10.concentration.toFixed(2)) : null,
+      no2: data.NO2 ? parseFloat(data.NO2.concentration.toFixed(2)) : null,
+      o3: data.O3 ? parseFloat(data.O3.concentration.toFixed(2)) : null,
+      co: data.CO ? parseFloat(data.CO.concentration.toFixed(2)) : null,
+      so2: data.SO2 ? parseFloat(data.SO2.concentration.toFixed(2)) : null
+    };
+    
+    // Get the highest AQI from all pollutants
+    const aqiValues = [
+      data.PM2_5?.aqi || 0,
+      data.PM10?.aqi || 0,
+      data.NO2?.aqi || 0,
+      data.O3?.aqi || 0,
+      data.CO?.aqi || 0,
+      data.SO2?.aqi || 0
+    ];
+    
+    const aqiUS = Math.max(...aqiValues);
+    const aqiInfo = getAirQualityInfo(aqiUS);
+    
+    return {
+      index: aqiUS,
+      level: aqiInfo.level,
+      color: aqiInfo.color,
+      pm2_5: pollutants.pm2_5,
+      pm10: pollutants.pm10,
+      no2: pollutants.no2,
+      o3: pollutants.o3,
+      co: pollutants.co,
+      so2: pollutants.so2
+    };
+  } catch (error) {
+    console.error('Error fetching air quality data:', error);
+    return null;
+  }
+};
+
 // API service with real implementations
 export const weatherApi = {
   // Get current weather and forecast for a location
@@ -50,10 +114,34 @@ export const weatherApi = {
       
       const data = await response.json();
       
-      // Extract air quality data
-      const airQuality = data.current.air_quality || {};
-      const aqiUS = Math.round(airQuality['us-epa-index'] || 1);
-      const aqiInfo = getAirQualityInfo(aqiUS);
+      // Get location name for air quality API
+      const locationName = data.location.name;
+      
+      // Fetch air quality data from Air Ninjas API
+      const airQualityData = await fetchAirQuality(locationName);
+      
+      // Fallback to WeatherAPI's air quality if Air Ninjas fails
+      let airQuality;
+      if (airQualityData) {
+        airQuality = airQualityData;
+      } else {
+        // Extract air quality data from WeatherAPI as fallback
+        const apiAirQuality = data.current.air_quality || {};
+        const aqiUS = Math.round(apiAirQuality['us-epa-index'] || 1);
+        const aqiInfo = getAirQualityInfo(aqiUS);
+        
+        airQuality = {
+          index: aqiUS,
+          level: aqiInfo.level,
+          color: aqiInfo.color,
+          co: apiAirQuality.co ? parseFloat(apiAirQuality.co.toFixed(2)) : null,
+          no2: apiAirQuality.no2 ? parseFloat(apiAirQuality.no2.toFixed(2)) : null,
+          o3: apiAirQuality.o3 ? parseFloat(apiAirQuality.o3.toFixed(2)) : null,
+          pm2_5: apiAirQuality.pm2_5 ? parseFloat(apiAirQuality.pm2_5.toFixed(2)) : null,
+          pm10: apiAirQuality.pm10 ? parseFloat(apiAirQuality.pm10.toFixed(2)) : null,
+          so2: apiAirQuality.so2 ? parseFloat(apiAirQuality.so2.toFixed(2)) : null,
+        };
+      }
       
       // Transform API response to match our app's data structure
       return {
@@ -83,17 +171,7 @@ export const weatherApi = {
           pressure: Math.round(data.current.pressure_mb),
           precipitationProbability: data.forecast.forecastday[0].day.daily_chance_of_rain,
           lastUpdated: "Just now",
-          airQuality: {
-            index: aqiUS,
-            level: aqiInfo.level,
-            color: aqiInfo.color,
-            co: airQuality.co ? parseFloat(airQuality.co.toFixed(2)) : null,
-            no2: airQuality.no2 ? parseFloat(airQuality.no2.toFixed(2)) : null,
-            o3: airQuality.o3 ? parseFloat(airQuality.o3.toFixed(2)) : null,
-            pm2_5: airQuality.pm2_5 ? parseFloat(airQuality.pm2_5.toFixed(2)) : null,
-            pm10: airQuality.pm10 ? parseFloat(airQuality.pm10.toFixed(2)) : null,
-            so2: airQuality.so2 ? parseFloat(airQuality.so2.toFixed(2)) : null,
-          }
+          airQuality: airQuality
         },
         forecast: {
           daily: data.forecast.forecastday.map((day: any) => {
