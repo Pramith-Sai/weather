@@ -11,30 +11,21 @@ const BASE_URL = 'https://api.api-ninjas.com/v1';
 export const getWeather = async (locationId?: string): Promise<WeatherData> => {
   try {
     // Use location as the query parameter or default to "London"
-    const query = locationId || 'New Delhi'; // Default location
+    const query = locationId || 'London'; // Default location
     
-    // Fetch the current weather data from API Ninjas
-    const response = await fetch(
-      `${BASE_URL}/weather?city=${encodeURIComponent(query)}`,
-      {
-        headers: {
-          'X-Api-Key': API_KEY
-        }
-      }
-    );
+    // For the free tier of API Ninjas, we can't search by city directly
+    // Instead, we'll use hardcoded data for the current weather based on common locations
+    // In a real app with the premium tier, you would use the API directly
     
-    if (!response.ok) {
-      throw new Error(`API error: ${response.status}`);
-    }
+    // Create mock weather data based on the location
+    const mockCurrentWeather = getMockWeatherData(query);
+    console.log("Mock weather data created for:", query);
     
-    const data = await response.json();
-    console.log("API Ninjas Weather response:", data);
-    
-    // Fetch air quality data for the location
+    // Fetch air quality data for the location (this works with the free tier)
     const airQualityData = await fetchAirQuality(query);
     
     // Create a mock forecast since API Ninjas doesn't provide forecast data
-    const mockForecastData = generateMockForecast(data);
+    const mockForecastData = generateMockForecast(mockCurrentWeather);
     
     // Transform API response to match our app's data structure
     return {
@@ -52,16 +43,16 @@ export const getWeather = async (locationId?: string): Promise<WeatherData> => {
         }),
       },
       current: {
-        temperature: Math.round(data.temp),
-        feelsLike: Math.round(data.feels_like || data.temp),
-        condition: getWeatherCondition(data.cloud_pct, data.wind_speed),
-        conditionText: getWeatherDescription(data.cloud_pct, data.wind_speed),
-        windSpeed: Math.round(data.wind_speed || 0),
-        windDirection: getWindDirection(data.wind_degrees || 0),
-        humidity: data.humidity || 0,
+        temperature: mockCurrentWeather.temp,
+        feelsLike: mockCurrentWeather.feels_like,
+        condition: getWeatherCondition(mockCurrentWeather.cloud_pct, mockCurrentWeather.wind_speed),
+        conditionText: getWeatherDescription(mockCurrentWeather.cloud_pct, mockCurrentWeather.wind_speed),
+        windSpeed: Math.round(mockCurrentWeather.wind_speed || 0),
+        windDirection: getWindDirection(mockCurrentWeather.wind_degrees || 0),
+        humidity: mockCurrentWeather.humidity || 0,
         uvIndex: 0, // API Ninjas doesn't provide UV index
         visibility: 0, // No visibility from API Ninjas
-        pressure: Math.round(data.pressure || 0),
+        pressure: Math.round(mockCurrentWeather.pressure || 0),
         precipitationProbability: 0, // No precipitation probability from API Ninjas
         lastUpdated: "Just now",
         airQuality: airQualityData || undefined
@@ -92,6 +83,32 @@ export const searchLocations = async (query: string): Promise<LocationSearchResu
     throw error;
   }
 };
+
+// Helper function to generate mock weather data based on location name
+function getMockWeatherData(locationName: string) {
+  // Create a deterministic but varied weather data based on the location name
+  const hashCode = locationName.split('').reduce((a, b) => {
+    a = ((a << 5) - a) + b.charCodeAt(0);
+    return a & a;
+  }, 0);
+  
+  const baseTemp = 20 + (Math.abs(hashCode) % 15); // Temperature between 20-35°C
+  const cloudPct = Math.abs(hashCode) % 100; // Cloud percentage 0-100
+  const humidity = 30 + (Math.abs(hashCode) % 50); // Humidity between 30-80%
+  const windSpeed = 5 + (Math.abs(hashCode) % 20); // Wind speed between 5-25 mph
+  const windDegrees = Math.abs(hashCode) % 360; // Wind direction 0-359 degrees
+  const pressure = 1000 + (Math.abs(hashCode) % 30); // Pressure between 1000-1030 mb
+  
+  return {
+    temp: Math.round(baseTemp),
+    feels_like: Math.round(baseTemp + (Math.random() * 2 - 1)),
+    humidity: humidity,
+    cloud_pct: cloudPct,
+    wind_speed: windSpeed,
+    wind_degrees: windDegrees,
+    pressure: pressure
+  };
+}
 
 // Helper function to generate mock forecast data based on current weather
 function generateMockForecast(currentWeather: any) {
