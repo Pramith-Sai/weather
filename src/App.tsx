@@ -5,8 +5,7 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-import { AuthProvider } from "@/context/AuthContext";
-import { useAuth } from "@/context/AuthContext";
+import { AuthProvider, useAuth } from "@/context/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import Index from "./pages/Index";
 import Today from "./pages/Today";
@@ -18,9 +17,23 @@ import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
 
+// Move AppContent inside App so it's only rendered after AuthProvider is set up
+const App = () => (
+  <QueryClientProvider client={queryClient}>
+    <AuthProvider>
+      <TooltipProvider>
+        <Toaster />
+        <Sonner />
+        <AppContent />
+      </TooltipProvider>
+    </AuthProvider>
+  </QueryClientProvider>
+);
+
+// Move this component declaration AFTER the App component
 const AppContent = () => {
   const [locationId, setLocationId] = useState<string | undefined>(undefined);
-  const { session } = useAuth();
+  const { session } = useAuth(); // Now this will work correctly
 
   // Load saved location on initial render or auth state change
   useEffect(() => {
@@ -67,17 +80,5 @@ const AppContent = () => {
     </BrowserRouter>
   );
 };
-
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <AuthProvider>
-      <TooltipProvider>
-        <Toaster />
-        <Sonner />
-        <AppContent />
-      </TooltipProvider>
-    </AuthProvider>
-  </QueryClientProvider>
-);
 
 export default App;
