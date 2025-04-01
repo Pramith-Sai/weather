@@ -47,7 +47,8 @@ export const fetchAirQuality = async (cityName: string): Promise<AirQuality | nu
       so2: data.SO2 ? parseFloat(data.SO2.concentration.toFixed(2)) : null
     };
     
-    // Get the highest AQI from all pollutants
+    // Get the highest AQI from all pollutants or use overall_aqi if present
+    const overallAqi = data.overall_aqi || 0;
     const aqiValues = [
       data.PM2_5?.aqi || 0,
       data.PM10?.aqi || 0,
@@ -57,7 +58,7 @@ export const fetchAirQuality = async (cityName: string): Promise<AirQuality | nu
       data.SO2?.aqi || 0
     ];
     
-    const aqiUS = Math.max(...aqiValues);
+    const aqiUS = overallAqi > 0 ? overallAqi : Math.max(...aqiValues);
     const aqiInfo = getAirQualityInfo(aqiUS);
     
     return {
@@ -77,9 +78,12 @@ export const fetchAirQuality = async (cityName: string): Promise<AirQuality | nu
   }
 };
 
-// Extract air quality data from WeatherAPI as fallback
+// Extract air quality data from WeatherAPI as fallback - no longer needed with the API Ninjas approach
+// but kept for backwards compatibility
 export const extractWeatherApiAirQuality = (apiAirQuality: any): AirQuality => {
-  const aqiUS = Math.round(apiAirQuality['us-epa-index'] || 1);
+  // Since we're now using API Ninjas only, this is a fallback function
+  // that creates a minimal air quality object when no air quality data is available
+  const aqiUS = apiAirQuality['us-epa-index'] || 1;
   const aqiInfo = getAirQualityInfo(aqiUS);
   
   return {
