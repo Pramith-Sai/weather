@@ -1,16 +1,13 @@
-
 import { useRef } from 'react';
 import { ChevronLeft, ChevronRight, Sun, Cloud, CloudRain, CloudSnow, CloudLightning, CloudDrizzle, CloudFog, Umbrella } from 'lucide-react';
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { DailyForecast, HourlyForecast, WeatherCondition } from '@/lib/types';
-
 interface ForecastProps {
   dailyForecast: DailyForecast[];
   hourlyForecast?: HourlyForecast[];
   showHourlyForecast?: boolean;
 }
-
 const Forecast = ({
   dailyForecast,
   hourlyForecast = [],
@@ -59,11 +56,9 @@ const Forecast = ({
         return <Sun size={size} className={iconClasses} />;
     }
   };
-  
   return <div className="space-y-8 animate-fade-in">
       {/* Hourly Forecast - Only show if showHourlyForecast is true */}
-      {showHourlyForecast && hourlyForecast && hourlyForecast.length > 0 && (
-        <div>
+      {showHourlyForecast && hourlyForecast && hourlyForecast.length > 0 && <div>
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-2xl font-light">Hourly Forecast</h2>
             <div className="flex space-x-2">
@@ -91,12 +86,11 @@ const Forecast = ({
                 </Card>)}
             </div>
           </div>
-        </div>
-      )}
+        </div>}
       
       {/* Daily Forecast */}
       <div>
-        <h2 className="text-2xl font-light mb-4">7-Day Forecast</h2>
+        
         <Card className="glass-panel overflow-hidden">
           <div className="divide-y divide-border">
             {dailyForecast.map((day, index) => <div key={index} className="flex items-center p-4 hover:bg-muted/30 transition-colors">
@@ -125,5 +119,4 @@ const Forecast = ({
       </div>
     </div>;
 };
-
 export default Forecast;
