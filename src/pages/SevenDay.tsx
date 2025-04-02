@@ -5,6 +5,7 @@ import { WeatherData } from '@/lib/types';
 import NavBar from '@/components/NavBar';
 import { Loader2 } from 'lucide-react';
 import Forecast from '@/components/Forecast';
+import LocationInfo from '@/components/LocationInfo';
 
 interface SevenDayProps {
   onLocationSelect: (locationId: string) => void;
@@ -45,7 +46,13 @@ const SevenDay = ({ onLocationSelect, locationId }: SevenDayProps) => {
       <NavBar onLocationSelect={onLocationSelect} />
       
       <main className="container mx-auto px-4 sm:px-6 lg:px-8 pt-28 pb-16 max-w-7xl">
-        <h1 className="text-3xl font-light mb-6">7-Day Forecast</h1>
+        <h1 className="text-3xl font-light mb-2">7-Day Forecast</h1>
+        
+        {weatherData?.location && (
+          <div className="flex items-center text-sm text-muted-foreground mb-6">
+            <LocationInfo location={weatherData.location} />
+          </div>
+        )}
         
         {isLoading ? (
           <div className="flex flex-col items-center justify-center min-h-[60vh]">
@@ -60,7 +67,7 @@ const SevenDay = ({ onLocationSelect, locationId }: SevenDayProps) => {
         ) : weatherData ? (
           <Forecast 
             dailyForecast={weatherData.forecast.daily}
-            hourlyForecast={weatherData.forecast.hourly} 
+            showHourlyForecast={false}
           />
         ) : null}
       </main>

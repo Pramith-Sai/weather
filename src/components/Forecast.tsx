@@ -1,15 +1,20 @@
-import { useRef, useEffect } from 'react';
+
+import { useRef } from 'react';
 import { ChevronLeft, ChevronRight, Sun, Cloud, CloudRain, CloudSnow, CloudLightning, CloudDrizzle, CloudFog, Umbrella } from 'lucide-react';
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { DailyForecast, HourlyForecast, WeatherCondition } from '@/lib/types';
+
 interface ForecastProps {
   dailyForecast: DailyForecast[];
-  hourlyForecast: HourlyForecast[];
+  hourlyForecast?: HourlyForecast[];
+  showHourlyForecast?: boolean;
 }
+
 const Forecast = ({
   dailyForecast,
-  hourlyForecast
+  hourlyForecast = [],
+  showHourlyForecast = true
 }: ForecastProps) => {
   const hourlyScrollRef = useRef<HTMLDivElement>(null);
 
@@ -54,37 +59,40 @@ const Forecast = ({
         return <Sun size={size} className={iconClasses} />;
     }
   };
+  
   return <div className="space-y-8 animate-fade-in">
-      {/* Hourly Forecast */}
-      <div>
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-2xl font-light">Hourly Forecast</h2>
-          <div className="flex space-x-2">
-            <Button variant="outline" size="icon" className="rounded-full" onClick={() => scrollHourly('left')}>
-              <ChevronLeft size={18} />
-            </Button>
-            <Button variant="outline" size="icon" className="rounded-full" onClick={() => scrollHourly('right')}>
-              <ChevronRight size={18} />
-            </Button>
+      {/* Hourly Forecast - Only show if showHourlyForecast is true */}
+      {showHourlyForecast && hourlyForecast && hourlyForecast.length > 0 && (
+        <div>
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-2xl font-light">Hourly Forecast</h2>
+            <div className="flex space-x-2">
+              <Button variant="outline" size="icon" className="rounded-full" onClick={() => scrollHourly('left')}>
+                <ChevronLeft size={18} />
+              </Button>
+              <Button variant="outline" size="icon" className="rounded-full" onClick={() => scrollHourly('right')}>
+                <ChevronRight size={18} />
+              </Button>
+            </div>
+          </div>
+          
+          <div className="relative">
+            <div ref={hourlyScrollRef} className="flex overflow-x-auto pb-4 hide-scrollbar space-x-4">
+              {hourlyForecast.map((hour, index) => <Card key={index} className="flex-shrink-0 w-[120px] glass-panel card-hover">
+                  <CardContent className="p-4 flex flex-col items-center">
+                    <p className="text-sm font-medium mb-2">{hour.time}</p>
+                    <WeatherIcon condition={hour.condition} />
+                    <p className="text-xl mt-2">{hour.temperature}°</p>
+                    <div className="flex items-center mt-2 text-xs text-muted-foreground">
+                      <Umbrella size={12} className="mr-1" />
+                      <span>{hour.precipitationProbability}%</span>
+                    </div>
+                  </CardContent>
+                </Card>)}
+            </div>
           </div>
         </div>
-        
-        <div className="relative">
-          <div ref={hourlyScrollRef} className="flex overflow-x-auto pb-4 hide-scrollbar space-x-4">
-            {hourlyForecast.map((hour, index) => <Card key={index} className="flex-shrink-0 w-[120px] glass-panel card-hover">
-                <CardContent className="p-4 flex flex-col items-center">
-                  <p className="text-sm font-medium mb-2">{hour.time}</p>
-                  <WeatherIcon condition={hour.condition} />
-                  <p className="text-xl mt-2">{hour.temperature}°</p>
-                  <div className="flex items-center mt-2 text-xs text-muted-foreground">
-                    <Umbrella size={12} className="mr-1" />
-                    <span>{hour.precipitationProbability}%</span>
-                  </div>
-                </CardContent>
-              </Card>)}
-          </div>
-        </div>
-      </div>
+      )}
       
       {/* Daily Forecast */}
       <div>
@@ -117,4 +125,5 @@ const Forecast = ({
       </div>
     </div>;
 };
+
 export default Forecast;
