@@ -4,7 +4,7 @@ import { mapWeatherCondition } from './weatherConditionMapping';
 import { fetchAirQuality, extractWeatherApiAirQuality } from './airQualityService';
 
 // API key for WeatherAPI.com
-const API_KEY = '995b07fb34e84840914160220251903';
+const API_KEY = 'd895c56ef431477087574543250204';
 const BASE_URL = 'https://api.weatherapi.com/v1';
 
 // Get current weather and forecast for a location
