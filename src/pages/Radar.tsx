@@ -3,8 +3,9 @@ import { useState, useEffect, useRef } from 'react';
 import { weatherApi } from '@/lib/weatherApi';
 import { WeatherData } from '@/lib/types';
 import NavBar from '@/components/NavBar';
-import { Loader2, Map, Layers } from 'lucide-react';
+import { Loader2, Map, Layers, AlertTriangle } from 'lucide-react';
 import { Card } from "@/components/ui/card";
+import { toast } from "sonner";
 
 interface RadarProps {
   onLocationSelect: (locationId: string) => void;
@@ -24,7 +25,9 @@ const Radar = ({ onLocationSelect, locationId }: RadarProps) => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [activeLayer, setActiveLayer] = useState('precipitation_new');
+  const [mapError, setMapError] = useState<string | null>(null);
   const mapRef = useRef<HTMLDivElement>(null);
+  const mapInstanceRef = useRef<any>(null);
   
   useEffect(() => {
     if (locationId) {
@@ -49,61 +52,148 @@ const Radar = ({ onLocationSelect, locationId }: RadarProps) => {
     }
   };
 
+  // Cleanup previous map instance when component unmounts or before creating a new one
+  const cleanupMap = () => {
+    if (mapInstanceRef.current) {
+      mapInstanceRef.current.remove();
+      mapInstanceRef.current = null;
+    }
+  };
+
+  // Initialize the map when weather data is available
   useEffect(() => {
     if (!weatherData || !mapRef.current) return;
     
-    // Center coordinates (from weather data or default)
+    // Clear any previous errors
+    setMapError(null);
+    
+    // Clean up previous map instance
+    cleanupMap();
+    
+    // Clear the map container
+    if (mapRef.current) {
+      mapRef.current.innerHTML = '';
+    }
+    
+    // Use weather data coordinates or default ones
     const lat = weatherData?.location?.latitude || 20;
     const lon = weatherData?.location?.longitude || 77;
-    
-    // Create the map container with a leaflet div
-    const mapContainer = document.createElement('div');
-    mapContainer.style.width = '100%';
-    mapContainer.style.height = '100%';
-    mapContainer.style.borderRadius = '0.5rem';
-    mapRef.current.innerHTML = '';
-    mapRef.current.appendChild(mapContainer);
-    
-    // Load leaflet from CDN
-    const link = document.createElement('link');
-    link.rel = 'stylesheet';
-    link.href = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css';
-    document.head.appendChild(link);
 
-    const script = document.createElement('script');
-    script.src = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js';
-    script.onload = () => {
-      // Initialize the map 
-      // @ts-ignore - Leaflet is loaded via CDN
-      const L = window.L;
-      const map = L.map(mapContainer).setView([lat, lon], 6);
+    // Load Leaflet CSS
+    if (!document.getElementById('leaflet-css')) {
+      const link = document.createElement('link');
+      link.rel = 'stylesheet';
+      link.href = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css';
+      link.id = 'leaflet-css';
+      document.head.appendChild(link);
+    }
 
-      // Add OpenStreetMap base layer
-      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-      }).addTo(map);
+    // Load Leaflet JS and initialize map
+    const initMap = () => {
+      try {
+        if (!mapRef.current) return;
+        
+        // @ts-ignore - Leaflet is loaded via CDN
+        const L = window.L;
+        
+        if (!L) {
+          throw new Error("Leaflet library not loaded properly");
+        }
+        
+        // Create a new map instance
+        const map = L.map(mapRef.current, {
+          center: [lat, lon],
+          zoom: 6,
+          zoomControl: true,
+          attributionControl: true
+        });
+        
+        mapInstanceRef.current = map;
 
-      // Add weather layer
-      const weatherLayer = L.tileLayer(
-        `https://tile.openweathermap.org/map/${activeLayer}/{z}/{x}/{y}.png?appid=2e11d9409c65f5ef0fd829a6e2245262`
-      ).addTo(map);
+        // Add OpenStreetMap base layer
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+          attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        }).addTo(map);
 
-      // Add marker for current location
-      if (weatherData.location) {
-        L.marker([weatherData.location.latitude, weatherData.location.longitude])
-          .addTo(map)
-          .bindPopup(`${weatherData.location.name}, ${weatherData.location.region}`)
-          .openPopup();
+        // Add weather layer from OpenWeatherMap
+        L.tileLayer(
+          `https://tile.openweathermap.org/map/${activeLayer}/{z}/{x}/{y}.png?appid=2e11d9409c65f5ef0fd829a6e2245262`,
+          {
+            attribution: '&copy; <a href="https://openweathermap.org/">OpenWeatherMap</a>',
+            maxZoom: 18
+          }
+        ).addTo(map);
+
+        // Add marker for current location
+        if (weatherData.location) {
+          L.marker([weatherData.location.latitude, weatherData.location.longitude])
+            .addTo(map)
+            .bindPopup(`${weatherData.location.name}, ${weatherData.location.region}`)
+            .openPopup();
+        }
+        
+        // Force a resize to ensure map renders correctly
+        setTimeout(() => {
+          map.invalidateSize();
+        }, 100);
+        
+        toast.success("Weather map loaded successfully");
+      } catch (err) {
+        console.error("Error initializing map:", err);
+        setMapError("Failed to initialize the weather map. Please try refreshing the page.");
+        toast.error("Failed to load weather map");
       }
     };
-    
-    document.body.appendChild(script);
 
+    // Check if Leaflet is already loaded
+    // @ts-ignore
+    if (window.L) {
+      initMap();
+    } else {
+      // Load Leaflet JS if not already loaded
+      const script = document.createElement('script');
+      script.src = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js';
+      script.onload = initMap;
+      script.onerror = () => {
+        setMapError("Failed to load map library. Please check your internet connection and try again.");
+        toast.error("Failed to load map library");
+      };
+      document.body.appendChild(script);
+    }
+
+    // Cleanup function
     return () => {
-      document.body.removeChild(script);
-      document.head.removeChild(link);
+      cleanupMap();
     };
   }, [weatherData, activeLayer]);
+
+  // Update map when layer changes
+  useEffect(() => {
+    if (!mapInstanceRef.current || !weatherData) return;
+    
+    try {
+      // @ts-ignore - Leaflet is loaded via CDN
+      const L = window.L;
+      
+      // Remove existing tile layers except the base layer
+      mapInstanceRef.current.eachLayer((layer: any) => {
+        if (layer instanceof L.TileLayer && layer.options.attribution.includes('OpenWeatherMap')) {
+          mapInstanceRef.current.removeLayer(layer);
+        }
+      });
+      
+      // Add the new weather layer
+      L.tileLayer(
+        `https://tile.openweathermap.org/map/${activeLayer}/{z}/{x}/{y}.png?appid=2e11d9409c65f5ef0fd829a6e2245262`,
+        {
+          attribution: '&copy; <a href="https://openweathermap.org/">OpenWeatherMap</a>',
+          maxZoom: 18
+        }
+      ).addTo(mapInstanceRef.current);
+    } catch (err) {
+      console.error("Error updating map layer:", err);
+    }
+  }, [activeLayer]);
 
   const handleLayerChange = (layerId: string) => {
     setActiveLayer(layerId);
@@ -143,7 +233,7 @@ const Radar = ({ onLocationSelect, locationId }: RadarProps) => {
                     onClick={() => handleLayerChange(layer.id)}
                     className={`px-3 py-1.5 text-sm rounded-full transition-colors ${
                       activeLayer === layer.id
-                        ? `bg-${layer.color}-100 text-${layer.color}-700 dark:bg-${layer.color}-900/30 dark:text-${layer.color}-400 border-2 border-${layer.color}-400`
+                        ? `bg-${layer.color}-100 text-${layer.color}-700 border-2 border-${layer.color}-400 dark:bg-${layer.color}-900/30 dark:text-${layer.color}-400`
                         : 'bg-white/80 dark:bg-gray-800/80 hover:bg-gray-100 dark:hover:bg-gray-700/80'
                     }`}
                   >
@@ -160,12 +250,41 @@ const Radar = ({ onLocationSelect, locationId }: RadarProps) => {
                   <h2 className="text-xl font-medium">Interactive Weather Map</h2>
                 </div>
                 
-                <div 
-                  ref={mapRef} 
-                  className="w-full aspect-[4/3] md:aspect-video bg-gradient-to-br from-blue-100 to-blue-300 dark:from-blue-950 dark:to-blue-900 rounded-lg"
-                >
-                  {/* Map will be rendered here */}
-                </div>
+                {mapError ? (
+                  <div className="w-full aspect-[4/3] md:aspect-video bg-red-50 dark:bg-red-900/20 rounded-lg flex items-center justify-center p-6">
+                    <div className="flex flex-col items-center text-center gap-2">
+                      <AlertTriangle className="h-8 w-8 text-red-500" />
+                      <p className="text-red-500 font-medium">Map Error</p>
+                      <p className="text-muted-foreground">{mapError}</p>
+                      <button 
+                        className="mt-4 px-4 py-2 bg-primary text-white rounded-md hover:bg-primary/90"
+                        onClick={() => {
+                          if (weatherData) {
+                            setMapError(null);
+                            // Wait for next tick to ensure mapError state is updated
+                            setTimeout(() => {
+                              if (locationId) {
+                                fetchWeather(locationId);
+                              } else {
+                                fetchWeather();
+                              }
+                            }, 0);
+                          }
+                        }}
+                      >
+                        Try Again
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <div 
+                    ref={mapRef} 
+                    className="w-full aspect-[4/3] md:aspect-video bg-gradient-to-br from-blue-100 to-blue-300 dark:from-blue-950 dark:to-blue-900 rounded-lg"
+                    style={{ height: '500px', maxHeight: '70vh' }}
+                  >
+                    {/* Map will be rendered here */}
+                  </div>
+                )}
                 
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                   <Card className="p-4 bg-blue-50 dark:bg-blue-900/50">
