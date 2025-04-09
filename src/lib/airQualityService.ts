@@ -1,9 +1,9 @@
 
 import { AirQuality } from './types';
 
-// API key for OpenWeatherMap
-const OPENWEATHER_API_KEY = '2e11d9409c65f5ef0fd829a6e2245262';
-const OPENWEATHER_BASE_URL = 'https://api.openweathermap.org/data/2.5';
+// API key for Air Ninjas
+const AIR_NINJAS_API_KEY = 'SMI5PxUWBSfc2sKaEG5ttg==XYct9CGH2LSTtRCT';
+const AIR_NINJAS_BASE_URL = 'https://api.api-ninjas.com/v1';
 
 // Map AQI index to descriptive text and color
 export const getAirQualityInfo = (aqi: number) => {
@@ -15,12 +15,17 @@ export const getAirQualityInfo = (aqi: number) => {
   return { level: 'Hazardous', color: '#7f1d1d' }; // Dark Red/Maroon
 };
 
-// Function to fetch air quality data from OpenWeatherMap API
-export const fetchAirQuality = async (lat: number, lon: number): Promise<AirQuality | null> => {
+// Function to fetch air quality data from Air Ninjas API
+export const fetchAirQuality = async (cityName: string): Promise<AirQuality | null> => {
   try {
-    console.log(`Fetching air quality for coordinates: lat=${lat}, lon=${lon}`);
+    console.log(`Fetching air quality for: ${cityName}`);
     const response = await fetch(
-      `${OPENWEATHER_BASE_URL}/air_pollution?lat=${lat}&lon=${lon}&appid=${OPENWEATHER_API_KEY}`
+      `${AIR_NINJAS_BASE_URL}/airquality?city=${encodeURIComponent(cityName)}`,
+      {
+        headers: {
+          'X-Api-Key': AIR_NINJAS_API_KEY
+        }
+      }
     );
     
     if (!response.ok) {
@@ -29,37 +34,42 @@ export const fetchAirQuality = async (lat: number, lon: number): Promise<AirQual
     }
     
     const data = await response.json();
-    console.log("OpenWeatherMap Air Pollution API response:", data);
+    console.log("Air Ninjas API response:", data);
     
-    // OpenWeatherMap AQI is on a scale of 1-5
-    // 1: Good, 2: Fair, 3: Moderate, 4: Poor, 5: Very Poor
-    const owmAqi = data.list[0].main.aqi;
+    // Calculate overall AQI based on the highest individual index
+    // Using US EPA index calculation method
+    const pollutants = {
+      pm2_5: data.PM2_5 ? parseFloat(data.PM2_5.concentration.toFixed(2)) : null,
+      pm10: data.PM10 ? parseFloat(data.PM10.concentration.toFixed(2)) : null,
+      no2: data.NO2 ? parseFloat(data.NO2.concentration.toFixed(2)) : null,
+      o3: data.O3 ? parseFloat(data.O3.concentration.toFixed(2)) : null,
+      co: data.CO ? parseFloat(data.CO.concentration.toFixed(2)) : null,
+      so2: data.SO2 ? parseFloat(data.SO2.concentration.toFixed(2)) : null
+    };
     
-    // Map OpenWeatherMap AQI (1-5) to US EPA AQI scale (0-500)
-    let mappedAqi;
-    switch (owmAqi) {
-      case 1: mappedAqi = 25; break;  // Good - middle of 0-50 range
-      case 2: mappedAqi = 75; break;  // Fair - middle of 51-100 range
-      case 3: mappedAqi = 125; break; // Moderate - middle of 101-150 range
-      case 4: mappedAqi = 175; break; // Poor - middle of 151-200 range
-      case 5: mappedAqi = 250; break; // Very Poor - middle of 201-300 range
-      default: mappedAqi = 25; break; // Default to Good if unknown
-    }
+    // Get the highest AQI from all pollutants
+    const aqiValues = [
+      data.PM2_5?.aqi || 0,
+      data.PM10?.aqi || 0,
+      data.NO2?.aqi || 0,
+      data.O3?.aqi || 0,
+      data.CO?.aqi || 0,
+      data.SO2?.aqi || 0
+    ];
     
-    const aqiInfo = getAirQualityInfo(mappedAqi);
-    
-    const components = data.list[0].components;
+    const aqiUS = Math.max(...aqiValues);
+    const aqiInfo = getAirQualityInfo(aqiUS);
     
     return {
-      index: mappedAqi,
+      index: aqiUS,
       level: aqiInfo.level,
       color: aqiInfo.color,
-      pm2_5: components.pm2_5 ? parseFloat(components.pm2_5.toFixed(2)) : null,
-      pm10: components.pm10 ? parseFloat(components.pm10.toFixed(2)) : null,
-      no2: components.no2 ? parseFloat(components.no2.toFixed(2)) : null,
-      o3: components.o3 ? parseFloat(components.o3.toFixed(2)) : null,
-      co: components.co ? parseFloat((components.co / 1000).toFixed(2)) : null, // Convert from μg/m³ to mg/m³
-      so2: components.so2 ? parseFloat(components.so2.toFixed(2)) : null
+      pm2_5: pollutants.pm2_5,
+      pm10: pollutants.pm10,
+      no2: pollutants.no2,
+      o3: pollutants.o3,
+      co: pollutants.co,
+      so2: pollutants.so2
     };
   } catch (error) {
     console.error('Error fetching air quality data:', error);
@@ -67,8 +77,7 @@ export const fetchAirQuality = async (lat: number, lon: number): Promise<AirQual
   }
 };
 
-// The below function is kept for compatibility with the existing codebase
-// It can be removed once the migration to OpenWeatherMap is complete
+// Extract air quality data from WeatherAPI as fallback
 export const extractWeatherApiAirQuality = (apiAirQuality: any): AirQuality => {
   const aqiUS = Math.round(apiAirQuality['us-epa-index'] || 1);
   const aqiInfo = getAirQualityInfo(aqiUS);
