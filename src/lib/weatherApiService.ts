@@ -1,6 +1,5 @@
 
-import { WeatherData, LocationSearchResult, AirQuality } from './types';
-import { mapWeatherCondition } from './weatherConditionMapping';
+import { WeatherData, LocationSearchResult, AirQuality, WeatherCondition } from './types';
 import { fetchAirQuality } from './airQualityService';
 
 // API key for OpenWeatherMap
@@ -122,7 +121,7 @@ const transformCurrentWeather = (current: any, airQuality: AirQuality | null) =>
   const conditionText = current.weather && current.weather[0] ? current.weather[0].description : 'Clear';
   
   // Map OpenWeatherMap condition codes to our app's conditions
-  let condition = mapOpenWeatherCondition(weatherId);
+  const condition = mapOpenWeatherCondition(weatherId);
   
   return {
     temperature: Math.round(current.temp),
@@ -148,7 +147,7 @@ const transformDailyForecast = (dailyData: any[]) => {
     const conditionText = day.weather && day.weather[0] ? day.weather[0].description : 'Clear';
     
     // Map condition code to our app's condition type
-    let condition = mapOpenWeatherCondition(weatherId);
+    const condition = mapOpenWeatherCondition(weatherId);
     
     return {
       date: date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' }),
@@ -185,7 +184,7 @@ const transformHourlyForecast = (hourlyData: any[]) => {
     const conditionText = hour.weather && hour.weather[0] ? hour.weather[0].description : 'Clear';
     
     // Map condition code to our app's condition type
-    let condition = mapOpenWeatherCondition(weatherId);
+    const condition = mapOpenWeatherCondition(weatherId);
     
     return {
       time: time.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true }),
@@ -206,7 +205,7 @@ const degreesToDirection = (degrees: number): string => {
 };
 
 // Helper function to map OpenWeatherMap condition codes to our app's conditions
-const mapOpenWeatherCondition = (code: number): string => {
+const mapOpenWeatherCondition = (code: number): WeatherCondition => {
   // Weather condition mapping based on OpenWeatherMap condition codes
   // https://openweathermap.org/weather-conditions
   
