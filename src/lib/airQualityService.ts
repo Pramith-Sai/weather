@@ -31,11 +31,12 @@ export const fetchAirQuality = async (lat: number, lon: number): Promise<AirQual
     const data = await response.json();
     console.log("OpenWeatherMap Air Pollution API response:", data);
     
-    // OpenWeatherMap AQI is on a scale of 1-5, we need to map it to our 0-500 scale
-    // 1: Good (0-50), 2: Fair (51-100), 3: Moderate (101-150), 4: Poor (151-200), 5: Very Poor (201+)
+    // OpenWeatherMap AQI is on a scale of 1-5
+    // 1: Good, 2: Fair, 3: Moderate, 4: Poor, 5: Very Poor
     const owmAqi = data.list[0].main.aqi;
-    let mappedAqi;
     
+    // Map OpenWeatherMap AQI (1-5) to US EPA AQI scale (0-500)
+    let mappedAqi;
     switch (owmAqi) {
       case 1: mappedAqi = 25; break;  // Good - middle of 0-50 range
       case 2: mappedAqi = 75; break;  // Fair - middle of 51-100 range
@@ -66,7 +67,8 @@ export const fetchAirQuality = async (lat: number, lon: number): Promise<AirQual
   }
 };
 
-// Extract air quality data from WeatherAPI as fallback
+// The below function is kept for compatibility with the existing codebase
+// It can be removed once the migration to OpenWeatherMap is complete
 export const extractWeatherApiAirQuality = (apiAirQuality: any): AirQuality => {
   const aqiUS = Math.round(apiAirQuality['us-epa-index'] || 1);
   const aqiInfo = getAirQualityInfo(aqiUS);
