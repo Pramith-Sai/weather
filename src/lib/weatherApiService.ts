@@ -21,13 +21,14 @@ export const getWeather = async (locationId?: string): Promise<WeatherData> => {
     
     const data = await response.json();
     
-    // Get location name for air quality API
-    const locationName = data.location.name;
+    // Get location coordinates for OpenWeatherMap air quality API
+    const lat = data.location.lat;
+    const lon = data.location.lon;
     
-    // Fetch air quality data from Air Ninjas API
-    const airQualityData = await fetchAirQuality(locationName);
+    // Fetch air quality data from OpenWeatherMap API
+    const airQualityData = await fetchAirQuality(lat, lon);
     
-    // Fallback to WeatherAPI's air quality if Air Ninjas fails
+    // Fallback to WeatherAPI's air quality if OpenWeatherMap fails
     let airQuality;
     if (airQualityData) {
       airQuality = airQualityData;
