@@ -10,7 +10,7 @@ const BASE_URL = 'https://api.weatherapi.com/v1';
 // Get current weather and forecast for a location
 export const getWeather = async (locationId?: string): Promise<WeatherData> => {
   try {
-    const query = locationId || 'New Delhi'; // Default location
+    const query = locationId || 'New Delhi'; // Default location set to New Delhi
     const response = await fetch(
       `${BASE_URL}/forecast.json?key=${API_KEY}&q=${query}&days=7&aqi=yes&alerts=no`
     );
