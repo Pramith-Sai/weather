@@ -1,10 +1,6 @@
 
 import { AirQuality } from './types';
 
-// API key for OpenWeatherMap
-const OPENWEATHER_API_KEY = '2e11d9409c65f5ef0fd829a6e2245262';
-const OPENWEATHER_BASE_URL = 'https://api.openweathermap.org/data/2.5';
-
 // Map AQI index to descriptive text and color
 export const getAirQualityInfo = (aqi: number) => {
   if (aqi <= 50) return { level: 'Good', color: '#4ade80' }; // Green
@@ -17,10 +13,12 @@ export const getAirQualityInfo = (aqi: number) => {
 
 // Function to fetch air quality data from OpenWeatherMap API
 export const fetchAirQuality = async (lat: number, lon: number): Promise<AirQuality | null> => {
+  const OPENWEATHER_API_KEY = '2e11d9409c65f5ef0fd829a6e2245262';
+  
   try {
     console.log(`Fetching air quality for coordinates: lat=${lat}, lon=${lon}`);
     const response = await fetch(
-      `${OPENWEATHER_BASE_URL}/air_pollution?lat=${lat}&lon=${lon}&appid=${OPENWEATHER_API_KEY}`
+      `https://api.openweathermap.org/data/2.5/air_pollution?lat=${lat}&lon=${lon}&appid=${OPENWEATHER_API_KEY}`
     );
     
     if (!response.ok) {
