@@ -3,11 +3,13 @@ import { ChevronLeft, ChevronRight, Sun, Cloud, CloudRain, CloudSnow, CloudLight
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { DailyForecast, HourlyForecast, WeatherCondition } from '@/lib/types';
+
 interface ForecastProps {
   dailyForecast: DailyForecast[];
   hourlyForecast?: HourlyForecast[];
   showHourlyForecast?: boolean;
 }
+
 const Forecast = ({
   dailyForecast,
   hourlyForecast = [],
@@ -15,7 +17,6 @@ const Forecast = ({
 }: ForecastProps) => {
   const hourlyScrollRef = useRef<HTMLDivElement>(null);
 
-  // Function to scroll the hourly forecast horizontally
   const scrollHourly = (direction: 'left' | 'right') => {
     if (hourlyScrollRef.current) {
       const scrollAmount = direction === 'left' ? -240 : 240;
@@ -26,7 +27,6 @@ const Forecast = ({
     }
   };
 
-  // Function to render weather icon based on condition
   const WeatherIcon = ({
     condition,
     size = 24
@@ -56,6 +56,7 @@ const Forecast = ({
         return <Sun size={size} className={iconClasses} />;
     }
   };
+
   return <div className="space-y-8 animate-fade-in">
       {/* Hourly Forecast - Only show if showHourlyForecast is true */}
       {showHourlyForecast && hourlyForecast && hourlyForecast.length > 0 && <div>
@@ -90,6 +91,7 @@ const Forecast = ({
       
       {/* Daily Forecast */}
       <div>
+        <h2 className="text-2xl font-light mb-4">7 Day Forecast</h2>
         
         <Card className="glass-panel overflow-hidden">
           <div className="divide-y divide-border">
@@ -119,4 +121,5 @@ const Forecast = ({
       </div>
     </div>;
 };
+
 export default Forecast;
