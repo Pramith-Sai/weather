@@ -1,11 +1,9 @@
-
 import { useState, useEffect } from 'react';
 import { weatherApi } from '@/lib/weatherApi';
 import { WeatherData } from '@/lib/types';
 import NavBar from '@/components/NavBar';
 import CurrentWeather from '@/components/CurrentWeather';
 import Forecast from '@/components/Forecast';
-import PersonalizedInsights from '@/components/PersonalizedInsights';
 import { Loader2 } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
@@ -61,14 +59,6 @@ const Index = ({ onLocationSelect, locationId }: IndexProps) => {
           </div>
         ) : weatherData ? (
           <div className="space-y-12">
-            {/* Personalized Insights Section */}
-            <section>
-              <PersonalizedInsights 
-                weatherData={weatherData}
-                locationId={locationId}
-              />
-            </section>
-            
             {/* Current Weather Section */}
             <section>
               <CurrentWeather 
