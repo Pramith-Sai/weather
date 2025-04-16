@@ -32,6 +32,11 @@ const PersonalizedInsights = ({ weatherData, locationId }: PersonalizedInsightsP
       }
     } catch (err) {
       console.error('Error fetching personalized insights:', err);
+      // Set fallback insights in case of error
+      setInsights([
+        `Weather today in ${weatherData.location.name}: ${weatherData.current.conditionText}`,
+        `Current temperature: ${weatherData.current.temperature}°C`
+      ]);
     } finally {
       setIsLoading(false);
     }

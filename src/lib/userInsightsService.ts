@@ -7,15 +7,14 @@ export const trackLocationView = async (userId: string | undefined, locationId: 
   if (!userId) return;
   
   try {
+    // Store the user's location view preference in their profile instead of a non-existent location_views table
     const { error } = await supabase
-      .from('location_views')
-      .insert({
-        user_id: userId,
+      .from('profiles')
+      .update({
         location_id: locationId,
-        temperature: weatherData.current.temperature,
-        condition: weatherData.current.condition,
-        timestamp: new Date().toISOString()
-      });
+        updated_at: new Date().toISOString()
+      })
+      .eq('id', userId);
       
     if (error) throw error;
   } catch (err) {
@@ -25,74 +24,55 @@ export const trackLocationView = async (userId: string | undefined, locationId: 
 
 // Get personalized insights based on user's viewing patterns
 export const getPersonalizedInsights = async (userId: string | undefined, currentWeather: WeatherData): Promise<string[]> => {
+  // If user is not logged in, return default insights
   if (!userId) return getDefaultInsights(currentWeather);
   
   try {
-    // Get user's recent location views
-    const { data: locationViews, error } = await supabase
-      .from('location_views')
+    // Get user's profile with their saved location
+    const { data: userProfile, error } = await supabase
+      .from('profiles')
       .select('*')
-      .eq('user_id', userId)
-      .order('timestamp', { ascending: false })
-      .limit(10);
+      .eq('id', userId)
+      .single();
       
     if (error) throw error;
     
-    if (!locationViews || locationViews.length < 3) {
+    // If we don't have enough data to create personalized insights, return defaults
+    if (!userProfile || !userProfile.location_id) {
       return getDefaultInsights(currentWeather);
     }
     
-    // Analyze user's viewing patterns to generate insights
+    // Generate personalized insights based on the user's saved location and current weather
     const insights: string[] = [];
     
-    // Check if user frequently checks the weather during certain times
-    const viewHours = locationViews.map(view => new Date(view.timestamp).getHours());
-    const morningViews = viewHours.filter(hour => hour >= 5 && hour < 12).length;
-    const afternoonViews = viewHours.filter(hour => hour >= 12 && hour < 18).length;
-    const eveningViews = viewHours.filter(hour => hour >= 18 && hour < 22).length;
-    const nightViews = viewHours.filter(hour => hour >= 22 || hour < 5).length;
-    
-    const maxViews = Math.max(morningViews, afternoonViews, eveningViews, nightViews);
-    
-    if (maxViews > 0) {
-      if (morningViews === maxViews) {
-        insights.push("You often check the weather in the morning. Today's morning forecast shows " + 
-          getMorningForecast(currentWeather));
-      } else if (afternoonViews === maxViews) {
-        insights.push("Based on your afternoon weather checks, today's afternoon looks " + 
-          getAfternoonForecast(currentWeather));
-      } else if (eveningViews === maxViews) {
-        insights.push("You frequently check evening weather. Tonight will be " + 
-          getEveningForecast(currentWeather));
-      }
+    // Add a personalization message if the user has a saved location
+    if (userProfile.location_id) {
+      insights.push(`Welcome back! You're viewing weather for ${currentWeather.location.name}, which appears to be a location you're interested in.`);
     }
     
-    // Check if user often views the same location
-    const locationCounts: Record<string, number> = {};
-    locationViews.forEach(view => {
-      locationCounts[view.location_id] = (locationCounts[view.location_id] || 0) + 1;
-    });
-    
-    const favoriteLocation = Object.entries(locationCounts)
-      .sort((a, b) => b[1] - a[1])[0];
-    
-    if (favoriteLocation && favoriteLocation[1] > 3) {
-      insights.push(`You seem interested in the weather in ${currentWeather.location.name}. We'll prioritize updates for this location.`);
+    // Time-based personalization
+    const hour = new Date().getHours();
+    if (hour >= 5 && hour < 12) {
+      insights.push("Good morning! Today's morning forecast shows " + getMorningForecast(currentWeather));
+    } else if (hour >= 12 && hour < 17) {
+      insights.push("Good afternoon! The rest of today looks " + getAfternoonForecast(currentWeather));
+    } else if (hour >= 17 && hour < 22) {
+      insights.push("Good evening! Tonight will be " + getEveningForecast(currentWeather));
+    } else {
+      insights.push("It's late night. Tomorrow's forecast shows " + getTomorrowForecast(currentWeather));
     }
     
-    // Check temperature preferences based on most viewed conditions
-    const temperatureViews = locationViews.map(view => view.temperature);
-    const avgTemperature = temperatureViews.reduce((sum, temp) => sum + temp, 0) / temperatureViews.length;
-    
-    if (currentWeather.current.temperature > avgTemperature + 5) {
-      insights.push("It's warmer than what you typically check. Consider dressing lighter today.");
-    } else if (currentWeather.current.temperature < avgTemperature - 5) {
-      insights.push("It's cooler than what you typically check. Consider bringing a jacket.");
+    // Temperature-based insight
+    if (currentWeather.current.temperature > 30) {
+      insights.push("It's warmer than usual today. Consider dressing lighter and staying hydrated.");
+    } else if (currentWeather.current.temperature < 10) {
+      insights.push("It's cooler than usual today. Consider bringing a jacket with you.");
     }
     
     // Add a fallback insight if we couldn't generate any specific ones
-    if (insights.length === 0) {
-      return getDefaultInsights(currentWeather);
+    if (insights.length < 2) {
+      const defaultInsights = getDefaultInsights(currentWeather);
+      insights.push(defaultInsights[0]);
     }
     
     return insights;
@@ -146,6 +126,14 @@ const getEveningForecast = (weather: WeatherData): string => {
   const avgTemp = Math.round(eveningHours.reduce((sum, hour) => sum + hour.temperature, 0) / eveningHours.length);
   
   return `${avgTemp}°C with ${mostCommon} conditions`;
+};
+
+// New helper function for tomorrow's forecast
+const getTomorrowForecast = (weather: WeatherData): string => {
+  if (weather.forecast.daily.length < 2) return "no data available for tomorrow";
+  
+  const tomorrow = weather.forecast.daily[1].day;
+  return `a high of ${tomorrow.maxTemp}°C and ${tomorrow.conditionText.toLowerCase()} conditions`;
 };
 
 // Get the most common weather condition from an array

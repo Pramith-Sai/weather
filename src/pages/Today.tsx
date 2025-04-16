@@ -88,7 +88,12 @@ const Today = ({ onLocationSelect, locationId }: TodayProps) => {
             {/* Weather Details Section */}
             <section>
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                <TodayDetails data={weatherData} />
+                <TodayDetails 
+                  data={weatherData.current}
+                  hourlyData={weatherData.forecast.hourly}
+                  sunrise={weatherData.forecast.daily[0].day.sunrise}
+                  sunset={weatherData.forecast.daily[0].day.sunset}
+                />
               </div>
             </section>
           </div>
