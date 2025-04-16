@@ -32,11 +32,21 @@ const PersonalizedInsights = ({ weatherData, locationId }: PersonalizedInsightsP
       }
     } catch (err) {
       console.error('Error fetching personalized insights:', err);
+      
       // Set fallback insights in case of error
-      setInsights([
+      const fallbackInsights = [
         `Weather today in ${weatherData.location.name}: ${weatherData.current.conditionText}`,
         `Current temperature: ${weatherData.current.temperature}°C`
-      ]);
+      ];
+      
+      // Add air quality insight if available
+      if (weatherData.current.airQuality) {
+        fallbackInsights.push(
+          `Air quality is ${weatherData.current.airQuality.level} (AQI: ${weatherData.current.airQuality.index})`
+        );
+      }
+      
+      setInsights(fallbackInsights);
     } finally {
       setIsLoading(false);
     }

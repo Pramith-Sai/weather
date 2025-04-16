@@ -6,6 +6,7 @@ import NavBar from '@/components/NavBar';
 import CurrentWeather from '@/components/CurrentWeather';
 import TodayDetails from '@/components/TodayDetails';
 import PersonalizedInsights from '@/components/PersonalizedInsights';
+import AirQualityIndicator from '@/components/AirQualityIndicator';
 import { Loader2 } from 'lucide-react';
 import LocationInfo from '@/components/LocationInfo';
 
@@ -84,6 +85,15 @@ const Today = ({ onLocationSelect, locationId }: TodayProps) => {
                 localTime={weatherData.location.localTime}
               />
             </section>
+            
+            {/* Air Quality Section */}
+            {weatherData.current.airQuality && (
+              <section className="flex justify-center">
+                <div className="glass-panel hover:shadow-lg transition-all p-6 rounded-lg border bg-card">
+                  <AirQualityIndicator airQuality={weatherData.current.airQuality} size="lg" />
+                </div>
+              </section>
+            )}
             
             {/* Weather Details Section */}
             <section>
