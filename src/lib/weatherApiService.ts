@@ -39,11 +39,15 @@ export const getWeather = async (locationId?: string): Promise<WeatherData> => {
     }
     
     // For Surat special case - update location name if necessary
-    // Improved condition to check for Surat in a more robust way
-    if (data.location.name.toLowerCase() === 'jalalpore' && 
-        (query.toLowerCase().includes('surat') || 
-         (locationId && locationId.toLowerCase().includes('surat')))) {
-      data.location.name = 'Surat';
+    // Explicitly check for Jalalpore and replace with Surat for any Surat-related search
+    if (data.location.name.toLowerCase() === 'jalalpore') {
+      // Either the query contains 'surat' or the location ID contains 'surat'
+      if (query.toLowerCase().includes('surat') || 
+          (locationId && locationId.toLowerCase().includes('surat')) ||
+          (data.location.region && data.location.region.toLowerCase().includes('gujarat'))) {
+        data.location.name = 'Surat';
+        console.log('Changed location name from Jalalpore to Surat');
+      }
     }
     
     // Transform API response to match our app's data structure
@@ -78,11 +82,15 @@ export const searchLocations = async (query: string): Promise<LocationSearchResu
     
     // Transform API response to match our app's data structure
     return data.map((location: any) => {
-      // Special case for Surat, Gujarat - improved condition
-      if (location.name.toLowerCase() === 'jalalpore' && 
-          (query.toLowerCase().includes('surat') || 
-           location.region.toLowerCase().includes('gujarat'))) {
-        location.name = 'Surat';
+      // Special case for Surat, Gujarat
+      // More explicit check to ensure Jalalpore is replaced with Surat
+      if (location.name.toLowerCase() === 'jalalpore') {
+        // Check if the search query includes 'surat' or the region is Gujarat
+        if (query.toLowerCase().includes('surat') || 
+            (location.region && location.region.toLowerCase().includes('gujarat'))) {
+          console.log('Changing location name from Jalalpore to Surat in search results');
+          location.name = 'Surat';
+        }
       }
       
       return {
