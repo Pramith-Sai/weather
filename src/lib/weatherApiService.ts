@@ -39,8 +39,10 @@ export const getWeather = async (locationId?: string): Promise<WeatherData> => {
     }
     
     // For Surat special case - update location name if necessary
+    // Improved condition to check for Surat in a more robust way
     if (data.location.name.toLowerCase() === 'jalalpore' && 
-        query.toLowerCase().includes('surat')) {
+        (query.toLowerCase().includes('surat') || 
+         (locationId && locationId.toLowerCase().includes('surat')))) {
       data.location.name = 'Surat';
     }
     
@@ -76,9 +78,10 @@ export const searchLocations = async (query: string): Promise<LocationSearchResu
     
     // Transform API response to match our app's data structure
     return data.map((location: any) => {
-      // Special case for Surat, Gujarat
+      // Special case for Surat, Gujarat - improved condition
       if (location.name.toLowerCase() === 'jalalpore' && 
-          query.toLowerCase().includes('surat')) {
+          (query.toLowerCase().includes('surat') || 
+           location.region.toLowerCase().includes('gujarat'))) {
         location.name = 'Surat';
       }
       
