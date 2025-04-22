@@ -38,6 +38,12 @@ export const getWeather = async (locationId?: string): Promise<WeatherData> => {
       airQuality = extractWeatherApiAirQuality(apiAirQuality);
     }
     
+    // For Surat special case - update location name if necessary
+    if (data.location.name.toLowerCase() === 'jalalpore' && 
+        query.toLowerCase().includes('surat')) {
+      data.location.name = 'Surat';
+    }
+    
     // Transform API response to match our app's data structure
     return {
       location: transformLocation(data.location),
@@ -69,12 +75,20 @@ export const searchLocations = async (query: string): Promise<LocationSearchResu
     const data = await response.json();
     
     // Transform API response to match our app's data structure
-    return data.map((location: any) => ({
-      id: `${location.lat},${location.lon}`, // Use coordinates as ID
-      name: location.name,
-      region: location.region,
-      country: location.country
-    }));
+    return data.map((location: any) => {
+      // Special case for Surat, Gujarat
+      if (location.name.toLowerCase() === 'jalalpore' && 
+          query.toLowerCase().includes('surat')) {
+        location.name = 'Surat';
+      }
+      
+      return {
+        id: `${location.lat},${location.lon}`, // Use coordinates as ID
+        name: location.name,
+        region: location.region,
+        country: location.country
+      };
+    });
   } catch (error) {
     console.error('Error searching locations:', error);
     throw error;
